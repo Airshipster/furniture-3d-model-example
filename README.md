@@ -8,6 +8,14 @@ Open the published page in a browser to rotate the model, inspect the dimensions
 
 [Open the interactive 3D model](https://airshipster.github.io/furniture-3d-model-example/)
 
+## Screenshots
+
+![Model view 2](screenshots/model-view-2.png)
+
+![Model view 1](screenshots/model-view-1.png)
+
+![Model view 3](screenshots/model-view-3.png)
+
 ## Technology
 
 - HTML5 and CSS3
