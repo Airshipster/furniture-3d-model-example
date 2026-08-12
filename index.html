@@ -13,13 +13,13 @@
     header { position: fixed; z-index: 2; top: 20px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; pointer-events: none; }
     h1 { margin: 0; font-size: clamp(21px, 3vw, 30px); font-weight: 600; }
     p { margin: 4px 0 0; color: #cfd5d9; }
-    .info-panel { position: relative; margin-top: 8px; width: min(360px, calc(100vw - 40px)); padding: 10px 34px 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); }
+    .info-panel { position: relative; margin-top: 8px; width: min(360px, calc(100vw - 40px)); padding: 10px 34px 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); pointer-events: auto; }
     .info-panel[hidden] { display: none; }
     .info-panel h2 { margin: 0 0 5px; font-size: 15px; font-weight: 650; }
     .info-panel strong, .info-panel span { display: block; }
     .info-panel span { color: #cfd5d9; font-size: 14px; }
     .info-close { position: absolute; top: 7px; right: 7px; width: 27px; height: 27px; padding: 0; border: 0; background: transparent; font-size: 22px; line-height: 1; }
-    .info-toggle { margin-top: 7px; padding: 5px 8px; font-size: 13px; }
+    .info-toggle { margin-top: 7px; padding: 5px 8px; font-size: 13px; pointer-events: auto; }
     .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; pointer-events: auto; }
     button { border: 1px solid #879199; border-radius: 8px; padding: 9px 12px; color: #eef1f3; background: #293137; font: inherit; cursor: pointer; }
     button:hover, button:focus-visible, button[aria-pressed="true"] { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
