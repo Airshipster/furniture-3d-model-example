@@ -8,7 +8,11 @@
   <meta property="og:title" content="Шкаф для ниши — 3D-модель">
   <meta property="og:description" content="Интерактивная 3D-модель мебели с размерами для демонстрации мастерам.">
   <meta property="og:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
-  <meta property="og:url" content="https://airshipster.github.io/furniture-3d-model-example/">
+  <meta property="og:image:secure_url" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="2320">
+  <meta property="og:image:height" content="1463">
+  <meta property="og:site_name" content="Furniture 3D Model Example">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
   <style>
@@ -37,7 +41,10 @@
     .loading { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; color: #eef5f7; background: #161a1d; font: 600 18px/1.4 system-ui, sans-serif; transition: opacity .18s ease; }
     .loading[hidden] { display: none; }
     .touch-hint { display: none; }
-    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { position: relative; left: auto; bottom: auto; width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .touch-hint { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 109px; display: block; overflow: hidden; color: #d5e0e4; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.2; text-align: center; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; } .legend { display: none; } }
+    .github-link { position: fixed; z-index: 3; right: 20px; bottom: 20px; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #879199; border-radius: 10px; color: #eef1f3; background: rgb(24 30 34 / 88%); pointer-events: auto; }
+    .github-link:hover, .github-link:focus-visible { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
+    .github-link svg { width: 23px; height: 23px; fill: currentColor; }
+    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { position: relative; left: auto; bottom: auto; width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .touch-hint { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 109px; display: block; overflow: hidden; color: #d5e0e4; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.2; text-align: center; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; } .github-link { top: 12px; right: 12px; bottom: auto; width: 36px; height: 36px; } .github-link svg { width: 20px; height: 20px; } .legend { display: none; } }
   </style>
 </head>
 <body>
@@ -47,6 +54,7 @@
   </header>
   <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
   <div class="touch-hint" id="touch-hint">Для навигации используйте два пальца</div>
+  <a class="github-link" href="https://github.com/Airshipster/furniture-3d-model-example" target="_blank" rel="noopener noreferrer" aria-label="Открыть репозиторий GitHub" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.44-2.53-.49-2.69-.94-.09-.23-.48-.94-.81-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.73c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
   <div class="loading" id="loading" role="status">Загрузка…</div>
   <div class="fallback" id="fallback">Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.</div>
   <script type="importmap">
