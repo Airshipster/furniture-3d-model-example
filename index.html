@@ -13,7 +13,7 @@
     header { position: fixed; z-index: 2; top: 20px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; pointer-events: none; }
     h1 { margin: 0; font-size: clamp(21px, 3vw, 30px); font-weight: 600; }
     p { margin: 4px 0 0; color: #cfd5d9; }
-    .info-panel { position: relative; margin-top: 8px; width: min(360px, calc(100vw - 40px)); padding: 10px 34px 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); pointer-events: auto; }
+    .info-panel { position: fixed; z-index: 2; left: 20px; bottom: 20px; width: min(360px, calc(100vw - 40px)); padding: 10px 34px 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); pointer-events: auto; }
     .info-panel[hidden] { display: none; }
     .info-panel h2 { margin: 0 0 5px; font-size: 15px; font-weight: 650; }
     .info-panel strong, .info-panel span { display: block; }
@@ -29,7 +29,8 @@
     .fallback { position: fixed; inset: 0; display: none; place-items: center; padding: 30px; text-align: center; color: #f4eee6; background: #171411; }
     .loading { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; color: #eef5f7; background: #161a1d; font: 600 18px/1.4 system-ui, sans-serif; transition: opacity .18s ease; }
     .loading[hidden] { display: none; }
-    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .legend { display: none; } }
+    .touch-hint { display: none; }
+    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { position: relative; left: auto; bottom: auto; width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .touch-hint { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 103px; display: block; overflow: hidden; color: #d5e0e4; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.2; text-align: center; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; } .legend { display: none; } }
   </style>
 </head>
 <body>
@@ -38,6 +39,7 @@
     <div class="controls" aria-label="Вид макета"><button id="front" type="button">Вид спереди</button><button id="iso" type="button" aria-pressed="true">Изометрия</button><button id="doors" type="button" aria-pressed="false">Закрыть дверцы</button><button id="hide-doors" type="button" aria-pressed="false">Скрыть дверцы</button><button id="snapshot" type="button">Сохранить PNG</button><button id="lang" type="button">AZ</button></div>
   </header>
   <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
+  <div class="touch-hint" id="touch-hint">Для навигации используйте два пальца</div>
   <div class="loading" id="loading" role="status">Загрузка…</div>
   <div class="fallback" id="fallback">Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.</div>
   <script type="importmap">
@@ -609,8 +611,8 @@
         link.download = 'maket-shkafa.png'; link.href = renderer.domElement.toDataURL('image/png'); link.click();
       });
       const translations = {
-        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 297 см × глубина 55 см × высота 265 см', dimensionsNote: 'Высота 265 см.', depthNote: 'Корпус: 53,2 см; фасады: 1,8 см; общая глубина: 55 см.', measure: 'Размеры указаны в сантиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
-        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 297 sm × dərinlik 55 sm × hündürlük 265 sm', dimensionsNote: 'Hündürlük 265 sm-dir.', depthNote: 'Korpus: 53,2 sm; fasadlar: 1,8 sm; ümumi dərinlik: 55 sm.', measure: 'Ölçülər santimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
+        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', touchHint: 'Для навигации используйте два пальца', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 297 см × глубина 55 см × высота 265 см', dimensionsNote: 'Высота 265 см.', depthNote: 'Корпус: 53,2 см; фасады: 1,8 см; общая глубина: 55 см.', measure: 'Размеры указаны в сантиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
+        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', touchHint: 'Naviqasiya üçün iki barmaqdan istifadə edin', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 297 sm × dərinlik 55 sm × hündürlük 265 sm', dimensionsNote: 'Hündürlük 265 sm-dir.', depthNote: 'Korpus: 53,2 sm; fasadlar: 1,8 sm; ümumi dərinlik: 55 sm.', measure: 'Ölçülər santimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
       };
       function applyLanguage(updateUrl = false) {
         const t = translations[language];
@@ -618,6 +620,7 @@
         document.getElementById('info-toggle').textContent = t.info;
         document.getElementById('info-heading').textContent = t.info;
         document.getElementById('info-close').setAttribute('aria-label', t.closeInfo);
+        document.getElementById('touch-hint').textContent = t.touchHint;
         document.getElementById('subtitle').textContent = t.subtitle;
         document.getElementById('front').textContent = t.front;
         document.getElementById('iso').textContent = t.iso;
