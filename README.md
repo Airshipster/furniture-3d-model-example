@@ -2,12 +2,19 @@
 
 A lightweight interactive 3D furniture model example, optimized for sharing with craftsmen.
 
-Open the published page in a browser to rotate the model, inspect the dimensions, open or hide the doors, switch between Russian and Azerbaijani, and save a PNG.
+Open the published page in a browser to rotate the model, inspect the dimensions, open or hide the doors, and save a PNG.
 
-## Language links
+## Live demo
 
-- Default link: Russian interface.
-- Add `?az` to the page URL for Azerbaijani: the interface opens in Azerbaijani without re-rendering the model.
+[Open the interactive 3D model](https://airshipster.github.io/furniture-3d-model-example/)
+
+## Technology
+
+- HTML5 and CSS3
+- JavaScript modules
+- [Three.js](https://threejs.org/) for the 3D scene
+- `OrbitControls` from Three.js for touch and mouse navigation
+- GitHub Pages for static hosting
 
 ## Reuse
 

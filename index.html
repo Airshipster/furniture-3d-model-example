@@ -13,31 +13,32 @@
     header { position: fixed; z-index: 2; top: 20px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; pointer-events: none; }
     h1 { margin: 0; font-size: clamp(21px, 3vw, 30px); font-weight: 600; }
     p { margin: 4px 0 0; color: #cfd5d9; }
+    .info-panel { position: relative; margin-top: 8px; width: min(360px, calc(100vw - 40px)); padding: 10px 34px 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); }
+    .info-panel[hidden] { display: none; }
+    .info-panel h2 { margin: 0 0 5px; font-size: 15px; font-weight: 650; }
+    .info-panel strong, .info-panel span { display: block; }
+    .info-panel span { color: #cfd5d9; font-size: 14px; }
+    .info-close { position: absolute; top: 7px; right: 7px; width: 27px; height: 27px; padding: 0; border: 0; background: transparent; font-size: 22px; line-height: 1; }
+    .info-toggle { margin-top: 7px; padding: 5px 8px; font-size: 13px; }
     .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; pointer-events: auto; }
     button { border: 1px solid #879199; border-radius: 8px; padding: 9px 12px; color: #eef1f3; background: #293137; font: inherit; cursor: pointer; }
     button:hover, button:focus-visible, button[aria-pressed="true"] { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
     button:disabled { opacity: .42; cursor: not-allowed; }
-    .dimensions { position: fixed; z-index: 2; left: 20px; bottom: 20px; max-width: 330px; padding: 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); }
-    .dimensions strong { display: block; }
-    .dimensions span { display: block; color: #cfd5d9; font-size: 14px; }
     .legend { position: fixed; z-index: 2; right: 20px; bottom: 20px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; max-width: 390px; pointer-events: none; }
     .legend span { padding: 6px 9px; border-radius: 7px; background: rgb(20 18 15 / 87%); color: #eee5da; font-size: 14px; }
-    .measure-note { position: fixed; z-index: 2; top: 88px; left: 20px; padding: 7px 10px; border-radius: 8px; background: rgb(24 30 34 / 88%); color: #d5e0e4; font-size: 13px; pointer-events: none; }
     .fallback { position: fixed; inset: 0; display: none; place-items: center; padding: 30px; text-align: center; color: #f4eee6; background: #171411; }
     .loading { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; color: #eef5f7; background: #161a1d; font: 600 18px/1.4 system-ui, sans-serif; transition: opacity .18s ease; }
     .loading[hidden] { display: none; }
-    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; justify-content: center; padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { padding: 8px 9px; font-size: 14px; } .dimensions { left: 12px; bottom: 118px; max-width: 245px; } .legend { display: none; } }
+    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .legend { display: none; } }
   </style>
 </head>
 <body>
   <header>
-    <div><h1 id="title">Шкаф для ниши</h1><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p></div>
+    <div><h1 id="title">Шкаф для ниши</h1><button id="info-toggle" class="info-toggle" type="button">Информация</button><section id="info-panel" class="info-panel"><button id="info-close" class="info-close" type="button" aria-label="Закрыть информацию">×</button><h2 id="info-heading">Информация</h2><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p><p id="measure-note">Размеры указаны в сантиметрах</p><strong id="dimensions-title">297 × 55 × 265 см</strong><span id="dimensions-note">Высота 265 см.</span><span id="depth-note">Корпус 53,2 см + фасады 1,8 см = общая глубина 55 см.</span></section></div>
     <div class="controls" aria-label="Вид макета"><button id="front" type="button">Вид спереди</button><button id="iso" type="button" aria-pressed="true">Изометрия</button><button id="doors" type="button" aria-pressed="false">Закрыть дверцы</button><button id="hide-doors" type="button" aria-pressed="false">Скрыть дверцы</button><button id="snapshot" type="button">Сохранить PNG</button><button id="lang" type="button">AZ</button></div>
   </header>
   <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
   <div class="loading" id="loading" role="status">Загрузка…</div>
-  <div class="dimensions"><strong id="dimensions-title">297 × 55 × 265 см</strong><span id="dimensions-note">Высота 265 см.</span><span id="depth-note">Корпус 53,2 см + фасады 1,8 см = общая глубина 55 см.</span></div>
-  <div class="measure-note" id="measure-note">Размеры указаны в сантиметрах</div>
   <div class="fallback" id="fallback">Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.</div>
   <script type="importmap">
     { "imports": {
@@ -60,7 +61,8 @@
       // и многократно повышает точность depth-buffer для дальних наклеек и граней.
       const camera = new THREE.PerspectiveCamera(35, 1, 10, 1300);
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-      renderer.setPixelRatio(1);
+      // Телефоны получают более чёткий, но всё ещё ограниченный по нагрузке рендер.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       stage.appendChild(renderer.domElement);
 
@@ -205,11 +207,13 @@
       const measureArrow = new THREE.MeshBasicMaterial({ color: 0xf1b760 });
       let currentDimensionGroup = null;
       let dimensionNumber = 0;
+      // Расстановка размерных линий, подтверждённая в локальном макете, зафиксирована и для Pages.
+      const fixedDimensionOffsets = { 'dimension-0': -25.35432554314569, 'dimension-1': 94.42708636005051, 'dimension-2': 0, 'dimension-3': 73.33474219475991, 'dimension-4': 6.5501659496703155, 'dimension-5': -17.71030513474585, 'dimension-6': 52.114063537802835, 'dimension-7': 2.1188938241712947, 'dimension-8': -18.004522352892195, 'dimension-9': 65.8055559279953, 'dimension-10': 66.14821162129869, 'dimension-11': 66.29624308385232, 'dimension-12': 60.92108398241582, 'dimension-13': 67.61457367093186, 'dimension-14': 68.0592339861079, 'dimension-15': 62.90538921610086, 'dimension-16': 67.52565314480677, 'dimension-17': -5.829188783660477, 'dimension-18': -6.03392825731175, 'dimension-19': 0.29625767233105194, 'dimension-20': -12.558440304954303, 'dimension-21': -10.396867851418847, 'dimension-22': -10.379462139122523, 'dimension-23': -13.268786353783753, 'dimension-24': -8.244596163349598, 'dimension-25': 72.79425072728509, 'dimension-26': -10.108363950302852, 'dimension-27': 1.8333621848571156, 'dimension-28': 105.10740877229227, 'dimension-29': -6.196105048907185, 'dimension-30': -63.98947652806275, 'dimension-31': -7.880581557062548, 'dimension-32': -12.97688622785796, 'dimension-33': -1.084257567154097, 'dimension-34': -46.212874855805, 'dimension-35': 28.431174503659676, 'dimension-36': -9.503455676094262, 'dimension-37': 23.560907208405283, 'dimension-38': -11.959499467282598, 'dimension-39': 18.53778005083538, 'dimension-40': -46.04633101447996, 'dimension-41': -0.2552562763863051, 'dimension-42': -9.737069655089982, 'dimension-43': 5.282710493826556, 'dimension-44': -11.711295578396147, 'dimension-45': 10.369156805559484, 'dimension-46': 8.537052320781157, 'dimension-47': 8.58731342388836 };
       function addDimensionObject(object) { (currentDimensionGroup || dimensions).add(object); }
       function startDimension(axis) {
         const group = new THREE.Group();
         group.userData = { draggableDimension: true, axis, id: `dimension-${dimensionNumber++}` };
-        const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v2') || '{}')[group.userData.id];
+        const saved = fixedDimensionOffsets[group.userData.id] ?? JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v2') || '{}')[group.userData.id];
         if (saved) group.position[axis] = saved;
         dimensions.add(group);
         currentDimensionGroup = group;
@@ -569,8 +573,10 @@
       centerDoorMaterial.envMapIntensity = 1.7;
       centerDoorMaterial.needsUpdate = true;
 
-      function front() { camera.position.set(0, H * 0.55, -790); controls.target.set(0, H * 0.5, 0); controls.update(); }
-      function iso() { camera.position.set(430, H * 0.76, -610); controls.target.set(0, H * 0.48, 0); controls.update(); }
+      let activeView = 'iso';
+      function viewDistance(extra = 35) { return Math.max(790, (W / 2 + extra) / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect)); }
+      function front() { const distance = viewDistance(); camera.position.set(0, H * 0.55, -distance); controls.target.set(0, H * 0.5, 0); controls.update(); activeView = 'front'; }
+      function iso() { const distance = viewDistance(85); const scale = distance / Math.hypot(430, 610); camera.position.set(430 * scale, H * 0.76, -610 * scale); controls.target.set(0, H * 0.48, 0); controls.update(); activeView = 'iso'; }
       function setButton(active) { document.getElementById('front').setAttribute('aria-pressed', String(active === 'front')); document.getElementById('iso').setAttribute('aria-pressed', String(active === 'iso')); }
       document.getElementById('front').addEventListener('click', () => { front(); setButton('front'); });
       document.getElementById('iso').addEventListener('click', () => { iso(); setButton('iso'); });
@@ -603,12 +609,15 @@
         link.download = 'maket-shkafa.png'; link.href = renderer.domElement.toDataURL('image/png'); link.click();
       });
       const translations = {
-        ru: { title: 'Шкаф для ниши', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 297 см × глубина 55 см × высота 265 см', dimensionsNote: 'Высота 265 см.', depthNote: 'Корпус: 53,2 см; фасады: 1,8 см; общая глубина: 55 см.', measure: 'Размеры указаны в сантиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
-        az: { title: 'Niş üçün dolab', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 297 sm × dərinlik 55 sm × hündürlük 265 sm', dimensionsNote: 'Hündürlük 265 sm-dir.', depthNote: 'Korpus: 53,2 sm; fasadlar: 1,8 sm; ümumi dərinlik: 55 sm.', measure: 'Ölçülər santimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
+        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 297 см × глубина 55 см × высота 265 см', dimensionsNote: 'Высота 265 см.', depthNote: 'Корпус: 53,2 см; фасады: 1,8 см; общая глубина: 55 см.', measure: 'Размеры указаны в сантиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
+        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 297 sm × dərinlik 55 sm × hündürlük 265 sm', dimensionsNote: 'Hündürlük 265 sm-dir.', depthNote: 'Korpus: 53,2 sm; fasadlar: 1,8 sm; ümumi dərinlik: 55 sm.', measure: 'Ölçülər santimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
       };
       function applyLanguage(updateUrl = false) {
         const t = translations[language];
         document.getElementById('title').textContent = t.title;
+        document.getElementById('info-toggle').textContent = t.info;
+        document.getElementById('info-heading').textContent = t.info;
+        document.getElementById('info-close').setAttribute('aria-label', t.closeInfo);
         document.getElementById('subtitle').textContent = t.subtitle;
         document.getElementById('front').textContent = t.front;
         document.getElementById('iso').textContent = t.iso;
@@ -697,7 +706,9 @@
         const changes = new EventSource('/events');
         changes.addEventListener('reload', () => location.reload());
       }
-      function resize() { const box = stage.getBoundingClientRect(); camera.aspect = box.width / box.height; camera.updateProjectionMatrix(); renderer.setSize(box.width, box.height, false); }
+      document.getElementById('info-toggle').addEventListener('click', () => { document.getElementById('info-panel').hidden = false; });
+      document.getElementById('info-close').addEventListener('click', () => { document.getElementById('info-panel').hidden = true; });
+      function resize() { const box = stage.getBoundingClientRect(); camera.aspect = box.width / box.height; camera.updateProjectionMatrix(); renderer.setSize(box.width, box.height, false); if (activeView === 'front') front(); else iso(); }
       new ResizeObserver(resize).observe(stage);
       iso(); resize();
       document.getElementById('loading').hidden = true;
