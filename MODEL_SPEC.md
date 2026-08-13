@@ -4,13 +4,14 @@
 
 | Property | Value |
 | --- | --- |
-| Overall width | 297 cm |
-| Overall height | 265 cm |
-| Carcass depth | 53.2 cm |
-| Facade / panel thickness | 1.8 cm |
-| Overall depth | 55 cm |
+| Overall width | 2970 mm |
+| Overall height | 2650 mm |
+| Carcass depth | 534 mm |
+| LDP thickness | 16 mm |
+| Rear hardboard | 3.2 mm |
+| Overall depth | 550 mm |
 
-All dimensions are in centimetres. The carcass, internal partitions, shelves, and facades use the same nominal 1.8 cm panel thickness.
+All dimensions are in millimetres. The carcass, internal partitions, shelves, and facades use the same nominal 16 mm LDP thickness.
 
 ## Sections and opening notation
 
@@ -28,7 +29,8 @@ The model creates rear cards for each opening: letter first, then the clear open
 
 ## Dimensions and labels
 
-- Orange lines and arrows are working dimensions. Internal lines are positioned 15 cm inside the cabinet.
+- Orange lines and arrows are approved working dimensions. Each line is fixed in the reviewed position recorded in `fixedDimensionOffsets`.
+- During review, every vertical line is constrained to the left/right edges of its own opening, and every horizontal line to that opening's bottom/top edges. Allowed marks are 0%, 25%, 33⅓%, 50%, 66⅔%, 75%, and 100%; final positions may differ by opening.
 - Exterior dimensions use compact two-line cards attached to the top, left, and right surfaces. They replace exterior orange dimension lines.
 - All label text is rendered in Russian by default; `?az` switches the interface and labels to Azerbaijani.
 - The language query is intentionally shareable: `/?az` is the Azerbaijani link and the URL without the query is Russian.

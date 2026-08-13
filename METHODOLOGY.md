@@ -5,13 +5,14 @@ This repository is a reusable example of a **presentation model**, not a furnitu
 ## Core principles
 
 1. **One visible model, one source of truth.** Dimensions, sections, doors, labels, materials, and interactions must describe the same physical cabinet.
-2. **Measurements use centimetres.** The cabinet depth is communicated as a construction formula: carcass depth + facade thickness = overall depth.
+2. **Measurements use millimetres.** The model, labels, and review notes use the same unit. Construction thicknesses and clear openings must be derived from it consistently.
 3. **Every internal rectangular opening has one letter.** Letters are unique, contain no numbers, and remain readable from the intended viewing side. They make conversation about an opening unambiguous.
 4. **Annotations behave like physical objects.** Internal dimension lines sit inside their own opening; surface cards sit directly on the corresponding exterior plane; door cards are attached to the exterior face of the door. Labels must be occluded by solid boards and doors rather than drawn through them.
-5. **Doors explain construction.** A door opens around its actual hinge side by 90 degrees. Hinges are shown only on the interior side. Door labels stay attached when a leaf opens. Mirrored leaves are mirrored only on the external face; their interior and edges remain ordinary panel material.
-6. **The model must stay lightweight.** Use simple procedural geometry, compact canvas labels, one static environment reflection for mirrored faces, and no continuous expensive reflection pass. It must remain usable on a modest phone.
-7. **Mobile is a first-class view.** Start in isometric view, keep controls visible, keep the information panel compact, and explain two-finger navigation when it is needed.
-8. **Language is shareable through the URL.** Russian is the default. `?az` opens Azerbaijani. Switching language updates the URL without rebuilding the model state.
+5. **A dimension owns one opening.** A vertical line may move only between that opening's left and right edges; a horizontal line may move only between its bottom and top edges. Its allowed placement marks are the edges plus 1/4, 1/3, 1/2, 2/3, and 3/4 of that opening. A nearby line from another opening can be a snap target only when its coordinate lies inside the current opening; it never expands the current opening's bounds.
+6. **Doors explain construction.** A door opens around its actual hinge side by 90 degrees. A hinge consists of a cup on the interior of the door and a mounting plate on the interior of the cabinet wall; no hinge hardware is visible outside. Door labels stay attached when a leaf opens. Mirrored leaves are mirrored only on the external face; their interior and edges remain ordinary panel material.
+7. **The model must stay lightweight.** Use simple procedural geometry, compact canvas labels, one static environment reflection for mirrored faces, and no continuous expensive reflection pass. It must remain usable on a modest phone.
+8. **Mobile is a first-class view.** Start in isometric view, keep controls visible, keep the information panel compact, and explain two-finger navigation when it is needed.
+9. **Language is shareable through the URL.** Russian is the default. `?az` opens Azerbaijani. Switching language updates the URL without rebuilding the model state.
 
 ## Implementation pattern
 
@@ -19,7 +20,7 @@ This repository is a reusable example of a **presentation model**, not a furnitu
 - Define overall dimensions and panel thickness first, then derive every section, shelf, door, and label position from those values.
 - Build carcass panels and internal boards with solid geometry before adding labels. Keep label materials depth-tested so hidden labels do not leak through furniture.
 - Use a compact canvas texture for each label. Draw the card in its own local plane rather than making it a camera-facing overlay.
-- Keep interactive dimensions in a dedicated group. Permit movement only perpendicular to the line: vertical dimensions move left/right; horizontal dimensions move up/down. Freeze final offsets in `fixedDimensionOffsets` once the layout is approved.
+- Keep dimensions in a dedicated group. During review, permit movement only perpendicular to the line and apply the owner-opening rule above. Once approved, freeze the reviewed offsets in `fixedDimensionOffsets`, remove the editing controls from the published page, and record the rule in this document.
 - Use an explicit state model for language, door visibility, and door-open state. Hiding doors disables the open/close action.
 
 ## Reusing this method with Codex
