@@ -24,6 +24,11 @@ Open the published page in a browser to rotate the model, inspect the dimensions
 - `OrbitControls` from Three.js for touch and mouse navigation
 - GitHub Pages for static hosting
 
-## Reuse
+## Method and specification
 
-You can download or clone this repository and give the code to Codex as a starting point for a custom furniture model. The page is intentionally lightweight for convenient viewing on a phone or when discussing the project with craftsmen.
+- [Methodology](METHODOLOGY.md) — reusable conventions for modelling, labelling, doors, materials, mobile performance, and review.
+- [Current model specification](MODEL_SPEC.md) — the exact dimensions, section notation, doors, labels, and interaction rules used by this example.
+
+## Reuse with Codex
+
+You can download or clone this repository and give it to Codex as a starting point for a custom furniture model. Ask it to read `METHODOLOGY.md` and `MODEL_SPEC.md` first, then replace the current model with your agreed dimensions and layout while preserving the method. The page is intentionally lightweight for convenient viewing on a phone or when discussing the project with craftsmen.
