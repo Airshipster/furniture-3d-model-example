@@ -1,6 +1,6 @@
-# Furniture 3D Model Example
+# Reusable Furniture 3D Presentation Standard
 
-A lightweight interactive 3D furniture model example, optimized for sharing with craftsmen.
+A lightweight interactive 3D presentation example for discussing custom furniture with customers and craftsmen. The scene in this repository is illustrative only: it is not a specification for a future cabinet.
 
 Open the published page in a browser to rotate the model, inspect the dimensions, open or hide the doors, and save a PNG.
 
@@ -24,12 +24,10 @@ Open the published page in a browser to rotate the model, inspect the dimensions
 - `OrbitControls` from Three.js for touch and mouse navigation
 - GitHub Pages for static hosting
 
-## Method and specification
+## Standard
 
-- [Methodology](METHODOLOGY.md) — reusable conventions for modelling, labelling, doors, materials, mobile performance, and review.
-- [Current model specification](MODEL_SPEC.md) — the exact dimensions, section notation, doors, labels, and interaction rules used by this example.
-- [Furniture project context](FURNITURE_CONTEXT.md) — current project handoff, publication link, and the rule for preserving approved marker positions.
+- [Furniture 3D standard](FURNITURE_STANDARD.md) — the complete reusable standard for construction logic, materials, annotations, doors, rear panels, review, and publication.
 
 ## Reuse with Codex
 
-You can download or clone this repository and give it to Codex as a starting point for a custom furniture model. Ask it to read `METHODOLOGY.md` and `MODEL_SPEC.md` first, then replace the current model with your agreed dimensions and layout while preserving the method. The page is intentionally lightweight for convenient viewing on a phone or when discussing the project with craftsmen.
+Clone this repository and give it to Codex as a starting point for a new custom furniture model. Ask it to read `FURNITURE_STANDARD.md` first, then replace the illustrative scene with the agreed dimensions and layout while preserving the standard. The page is intentionally lightweight for convenient viewing on a phone or when discussing the project with craftsmen.
