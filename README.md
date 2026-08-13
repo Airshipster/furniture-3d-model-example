@@ -10,11 +10,11 @@ Open the published page in a browser to rotate the model, inspect the dimensions
 
 ## Screenshots
 
-![Model view 2](screenshots/model-view-2.png)
+![Model view 2](screenshots/model-view-2.png?v=3b9ce1a)
 
-![Model view 1](screenshots/model-view-1.png)
+![Model view 1](screenshots/model-view-1.png?v=3b9ce1a)
 
-![Model view 3](screenshots/model-view-3.png)
+![Model view 3](screenshots/model-view-3.png?v=3b9ce1a)
 
 ## Technology
 
