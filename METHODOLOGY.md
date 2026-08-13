@@ -21,6 +21,8 @@ This repository is a reusable example of a **presentation model**, not a furnitu
 - Build carcass panels and internal boards with solid geometry before adding labels. Keep label materials depth-tested so hidden labels do not leak through furniture.
 - Use a compact canvas texture for each label. Draw the card in its own local plane rather than making it a camera-facing overlay.
 - Keep dimensions in a dedicated group. During review, permit movement only perpendicular to the line and apply the owner-opening rule above. Once approved, freeze the reviewed offsets in `fixedDimensionOffsets`, remove the editing controls from the published page, and record the rule in this document.
+- **Reviewed marker placement is model-specific.** The approved position of every orange line is the exact saved value in `fixedDimensionOffsets`; do not regenerate, round, normalise, or replace it with a common fraction just because another opening has the same size. The snap fractions are only review aids. Different vertical and horizontal lines may deliberately use different approved proportions.
+- When a reviewer finalises a layout, copy the whole current saved marker map into `fixedDimensionOffsets` in one operation, including every new marker ID. Confirm that the count and every value match the locally saved map before publishing. Treat that map as the canonical record of where the reviewer placed the lines, including right-side sections.
 - Use an explicit state model for language, door visibility, and door-open state. Hiding doors disables the open/close action.
 
 ## Reusing this method with Codex

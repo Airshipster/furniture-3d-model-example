@@ -31,6 +31,7 @@ The model creates rear cards for each opening: letter first, then the clear open
 
 - Orange lines and arrows are approved working dimensions. Each line is fixed in the reviewed position recorded in `fixedDimensionOffsets`.
 - During review, every vertical line is constrained to the left/right edges of its own opening, and every horizontal line to that opening's bottom/top edges. Allowed marks are 0%, 25%, 33⅓%, 50%, 66⅔%, 75%, and 100%; final positions may differ by opening.
+- The current 43-marker placement is the approved local review snapshot. Its exact per-marker offsets are preserved in `index.html` without normalisation; this includes the individually reviewed right-hand markers. A future update must copy the complete local saved map, rather than reconstructing positions from the generic snap fractions.
 - Exterior dimensions use compact two-line cards attached to the top, left, and right surfaces. They replace exterior orange dimension lines.
 - All label text is rendered in Russian by default; `?az` switches the interface and labels to Azerbaijani.
 - The language query is intentionally shareable: `/?az` is the Azerbaijani link and the URL without the query is Russian.
