@@ -28,6 +28,7 @@ Open the published page in a browser to rotate the model, inspect the dimensions
 
 - [Methodology](METHODOLOGY.md) — reusable conventions for modelling, labelling, doors, materials, mobile performance, and review.
 - [Current model specification](MODEL_SPEC.md) — the exact dimensions, section notation, doors, labels, and interaction rules used by this example.
+- [Furniture project context](FURNITURE_CONTEXT.md) — current project handoff, publication link, and the rule for preserving approved marker positions.
 
 ## Reuse with Codex
 
