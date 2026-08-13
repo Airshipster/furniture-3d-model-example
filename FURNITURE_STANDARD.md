@@ -1,60 +1,179 @@
-# Furniture 3D Presentation Standard
+# FURNITURE_3D_STANDARD v1
 
-This is a reusable standard for interactive furniture presentations. It is not a cutting list, a manufacturing drawing, or a parameter source for the illustrative cabinet in this repository.
+## 0. Agent contract
 
-## 1. Source of truth and measurements
+```text
+ROLE: Codex builds an interactive furniture presentation model.
+UNIT: mm.
+SCOPE: visual communication and review only; never treat the model as a manufacturing drawing.
+INPUT: project-specific data supplied by the user.
+OUTPUT: a lightweight interactive model, approved screenshots, and share metadata.
+RULE PRECEDENCE: user project brief > this standard > existing illustrative scene.
+FORBIDDEN: infer dimensions, material properties, load capacity, sheet size, hardware clearances, or wall-fixing requirements when they are not supplied.
+```
 
-- Use millimetres for every dimension, label, calculation, and review note.
-- Start every new model with a compact project data block: external envelope, board/facade/rear-panel thicknesses, plinth or support height, openings, doors, and approved marker offsets.
-- Derive all boards, openings, facades, labels, and dimensions from that data. Do not use unrelated hand-tuned geometry.
-- Verify each axis end-to-end: all clear openings, boards, gaps, plinth/support, and outer panels must equal the declared external width, height, and depth.
-- Record actual materials, edge-banding allowance, maximum sheet sizes, hardware clearances, and load requirements for the project. Never silently reuse them from another cabinet.
+## 1. Required project input
 
-## 2. Structural representation
+Before changing geometry, obtain or explicitly mark as pending:
 
-- A free-standing cabinet requires planar stability. Show a rear panel and required wall anchors unless a qualified craftsperson specifies another structural solution.
-- Divide rear panels on structural partitions, never through the centre of a clear opening. Rear panels should visibly overlap supporting outer boards instead of appearing to float.
-- When hardboard is used as the rear panel, choose the panel division from the structural section boundaries and the available sheet size. A seam belongs between sections, not behind a shelf or in the middle of a usable compartment.
-- In the rear view, show each hardboard sheet as one restrained rectangular outline with a subtle diagonal cross inside. The outline identifies one sheet; the cross identifies its plane. Use a clear grey tone that is distinct from cabinet geometry.
-- Show internal boards behind a rear sheet as broad dashed guides with the board's nominal thickness, placed in a separate non-overlapping plane. The guides must be visually subordinate to the hardboard sheet outline and must not protrude as if they were rear-mounted boards.
-- A standing cabinet needs a plinth or an explicitly designed support system. Structural inter-section partitions continue to the floor; only the front plinth face may be split into separate pieces.
-- Model every load path. A support above a niche must continue to a structural board, floor support, wall fixing, or specified metal reinforcement.
-- Show wall-fixing points where required. They are safety information, not decoration.
+```yaml
+envelope_mm: { width, height, carcass_depth, overall_depth }
+materials: { carcass_thickness, facade_thickness, rear_panel_thickness, edge_banding_allowance }
+support: { mode: freestanding|built_in, plinth_or_support_height, wall_anchor_requirement }
+sections: [{ id, bounds_mm, openings: [{ id, bounds_mm, intended_use, load_if_known }] }]
+doors: [{ id, owner_openings, bounds_mm, hinge_side, hinge_count, gaps_mm, mirror_exterior }]
+rear_panels: { material, available_sheet_bounds_mm, panel_boundaries }
+presentation: { languages, screenshot_order, social_preview_image, published_url }
+```
 
-## 3. Doors, mirrors, and hinges
+Do not copy these values from a previous furniture model. Store each new model's input in a project-specific data block in the implementation, not in this standard.
 
-- Every door covers the boards it is intended to cover and leaves only agreed facade gaps.
-- Confirm all perimeter and meeting gaps with the selected hardware. Mirrored doors need safe clearance so they cannot touch neighbouring leaves after adjustment.
-- A hinge consists of a cup on the inside of the facade and a mounting plate on the inside of the cabinet wall. No hinge hardware is visible from outside.
-- Place hinge centres in clear opening space, never on a shelf, a partition edge, or another collision surface. Keep top and bottom hinge placement symmetric when practical.
-- Labels and dimensions remain attached to a moving door. A mirror effect belongs only on the exterior face; the interior and edges remain normal board material.
+## 2. Coordinate and accounting invariants
 
-## 4. Openings and annotations
+```text
+ALL_DIMENSIONS_USE_MM = true
+ALL_GEOMETRY_IS_DERIVED_FROM_PROJECT_DATA = true
+NO_UNEXPLAINED_MAGIC_COORDINATES = true
 
-- Give every internal rectangular opening one unique letter and use it consistently.
-- A dimension annotation belongs to one owner opening. Vertical annotations are constrained to that opening's left/right edges; horizontal annotations are constrained to its bottom/top edges. They never enter a neighbouring opening.
-- Every opening uses the same local snap fractions on its relevant axis: **0%, 25%, 33 1/3%, 50%, 66 2/3%, 75%, and 100%**. Calculate them from that opening's real bounds, never from the full cabinet or a screen offset.
-- A marker may snap to a neighbouring marker only if the target coordinate already lies inside the owner opening. It never expands the owner's bounds.
-- During review, marker controls may be visible. On approval, save the complete current marker map exactly as placed, hide the editing UI, and publish the saved map unchanged. Different openings may intentionally use different final fractions.
-- Exterior dimensions use compact cards anchored to the actual outer surface. Internal lines and labels must depth-test and be occluded by solid boards and closed doors.
+sum(clear_openings + board_thicknesses + declared_gaps + plinth/support + outer_panels)
+  == declared_outer_axis_length
+for axis in {width, height, depth}
+```
 
-## 5. Visual and interaction rules
+- Recalculate all three axes after every structural change.
+- Material thickness, edge-banding deduction, maximum sheet size, hardware clearance, and facade gap are project inputs, not global constants.
+- Flag any missing value that changes a fabrication, safety, collision, or sheet-layout decision.
 
-- Boards meet edge-to-edge without intersecting. Avoid coplanar or overlapping geometry: it causes visual flicker.
-- Rear panel divisions are explanatory only. Use subdued bounded rectangles and dashed guides; they must not look like protruding boards or required cuts through openings. Each dashed segment pattern starts and ends with a visible dash, for both horizontal and vertical guides.
-- Keep the scene lightweight: simple procedural geometry, compact canvas labels, static mirror highlights, and no continuous costly reflection pass.
-- Support touch and mouse orbit controls, useful front/isometric views, and PNG export. Validate the result on desktop and a modest phone.
-- If Russian and Azerbaijani are supplied, make language state shareable in the URL and translate every visible label consistently.
+## 3. Structure and safety
 
-## 6. Review and publication checklist
+```text
+IF support.mode == freestanding:
+  REQUIRE rear_panel_for_planar_stability
+  REQUIRE explicit_wall_anchor_status
 
-1. Recalculate widths, heights, depths, material thicknesses, facade gaps, rear panels, and plinth/support elements.
-2. Inspect open and closed doors for collisions, visible hinges, unintended overlap, and exposed board strips.
-3. Inspect the rear view for load paths, rear-panel seams, and geometry flicker.
-4. Save the full approved annotation layout and remove or hide the editing controls.
-5. Export screenshots in their agreed order. Set the requested image in both `og:image` and `twitter:image`.
-6. Verify the published page, desktop/mobile behaviour, language links, screenshots, and social preview before handoff.
+IF a vertical support receives load from above:
+  REQUIRE continuous_load_path_to(structural_board OR floor_support OR wall_anchor OR specified_metal_reinforcement)
 
-## Scope boundary
+IF a structural inter-section partition is a floor support:
+  REQUIRE partition.extends_to_floor == true
+```
 
-The model communicates an agreed concept. Cutting lists, load calculations, joinery, edge-banding deductions, hardware selection, wall anchors, and installation must be verified by the responsible designer and craftsperson.
+- Do not leave an unsupported vertical load on the middle of a shelf or niche top.
+- Keep a usable niche clear unless the brief explicitly accepts a support/reinforcement inside it.
+- A standing cabinet requires a plinth or an explicitly designed support system.
+- Divide only the **front plinth face** when required by material length or access; do not split structural inter-section partitions because of that division.
+- Render required wall-fixing points as safety information.
+
+## 4. Rear hardboard / rear-panel contract
+
+```text
+rear_panel_seam.position MUST coincide_with structural_section_boundary
+rear_panel_seam.position MUST NOT pass_through clear_opening
+rear_panel.geometry MUST overlap supporting_outer_boards
+rear_guides.z MUST NOT intersect rear_panel.z
+rear_guides.style = broad_dash(nominal_board_thickness)
+```
+
+- Choose rear-panel sheet boundaries from structural section boundaries and available sheet dimensions.
+- In rear view, render each sheet as one subtle rectangular outline with a diagonal cross inside it.
+- The rectangle identifies one sheet. The cross identifies the sheet plane. Neither is a physical board.
+- Render internal boards behind a rear sheet as visually subordinate broad dashed guides in a separate, non-overlapping plane.
+- Dashed guides must start **and** end with a visible dash on both horizontal and vertical lines.
+- Rear sheet outlines, crosses, and guides must not resemble protruding boards or mandatory cuts through clear openings.
+
+## 5. Geometry anti-flicker invariant
+
+```text
+FOR EVERY pair of visible surfaces:
+  INTERSECTION_VOLUME == 0
+  COPLANAR_OVERLAP == 0
+
+edge_to_edge_contact IS ALLOWED
+surface_penetration IS FORBIDDEN
+```
+
+- Boards meet edge-to-edge; they do not penetrate each other.
+- Rear panels, rear guides, labels, facade overlays, mirrors, and dimensions must use separated planes when overlap would otherwise be coplanar.
+- Treat flicker as a geometry error. Find and remove the intersection; do not conceal it with rendering options.
+
+## 6. Door and hinge contract
+
+```text
+door.coverage == agreed_board_coverage
+door.perimeter_gap == project.door.gaps_mm
+door.meeting_gap >= agreed_safe_clearance
+
+hinge.cup.location == door.interior
+hinge.mounting_plate.location == cabinet_wall.interior
+hinge.visible_from_exterior == false
+hinge.center MUST be inside clear_opening_space
+hinge.center MUST NOT be on shelf OR partition_edge OR collision_surface
+```
+
+- Model closed and open door states; inspect both before publication.
+- Keep top and bottom hinge distances symmetric where practical.
+- Door dimensions and labels move with the facade.
+- Mirroring exists only on a mirror door's exterior face. Its interior and edges use ordinary board material.
+- Do not leave a board strip exposed where the agreed facade must cover it.
+
+## 7. Opening IDs and annotations
+
+```text
+opening.id: unique_letter
+annotation.owner_opening: required
+
+vertical_annotation.range = [owner.left, owner.right]
+horizontal_annotation.range = [owner.bottom, owner.top]
+allowed_snap_fractions = [0, 0.25, 1/3, 0.5, 2/3, 0.75, 1]
+```
+
+```text
+ANNOTATION MUST NOT leave owner_opening.bounds
+ANNOTATION MUST NOT use cabinet-global bounds for local snapping
+NEIGHBOUR_MARKER may_be_snap_target ONLY IF neighbour.coordinate IN owner_opening.bounds
+NEIGHBOUR_MARKER MUST NOT expand owner_opening.bounds
+```
+
+- Create local snap coordinates from real owner-opening bounds on every relevant axis.
+- Do not implement section-specific snap exceptions. Fix any snapping problem in the generic owner-bound calculation.
+- Keep annotation placement editable only during review.
+- When approved, save the entire marker map in one operation. Preserve exact per-marker values; do not round, normalise, reconstruct from generic fractions, or copy a stale partial map.
+- Hide or remove annotation editing controls in the published model.
+- Exterior dimensions use compact cards anchored to their actual exterior plane. Internal annotations and cards must depth-test and be occluded by closed doors and boards.
+
+## 8. Presentation runtime requirements
+
+```text
+renderer: lightweight
+labels: compact_canvas_textures
+mirrors: static_exterior_highlight
+continuous_expensive_reflection: forbidden
+controls: mouse_orbit + touch_orbit
+views: front + isometric + PNG_export
+```
+
+- Validate desktop and modest-phone performance.
+- Do not use a floor/grid that obstructs underside inspection unless the project brief requires it.
+- If Russian and Azerbaijani are supplied, translate all visible labels. Persist language in a shareable URL state.
+
+## 9. Publication acceptance checks
+
+```text
+CHECK axis_accounting == PASS
+CHECK free_standing_stability_and_anchor_status == PASS_or_explicitly_pending
+CHECK load_paths == PASS
+CHECK rear_panel_seams_and_visual_guides == PASS
+CHECK no_visible_geometry_flicker == PASS
+CHECK closed_and_open_doors == PASS
+CHECK no_exterior_hinges == PASS
+CHECK annotation_bounds_and_saved_marker_map == PASS
+CHECK desktop_and_mobile == PASS
+CHECK screenshots_in_agreed_order == PASS
+CHECK og:image == requested_social_preview_image
+CHECK twitter:image == requested_social_preview_image
+CHECK published_page == PASS
+```
+
+## 10. Scope boundary
+
+The model communicates an agreed concept. Cutting lists, load calculations, joinery, edge-banding deductions, hardware selection, wall anchors, and installation remain subject to verification by the responsible designer and craftsperson.
