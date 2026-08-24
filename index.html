@@ -165,10 +165,6 @@
         leaf.position.set(hingeX, y, z);
         leaf.userData.openRotation = direction * Math.PI / 2;
         leaf.userData.direction = direction;
-        leaf.userData.closedZ = z;
-        // When opened, neighbouring leaves on opposite sides of a partition
-        // are separated by one facade thickness instead of occupying one plane.
-        leaf.userData.openDepthOffset = direction * T / 2;
         doorsGroup.add(leaf); doorLeaves.push(leaf);
         const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, T), material);
         mesh.position.set(direction * w / 2, 0, 0); mesh.renderOrder = 2; leaf.add(mesh);
@@ -181,7 +177,6 @@
         leaf.position.set(x, bottom, z);
         leaf.userData.openAxis = 'x';
         leaf.userData.openRotation = -Math.PI / 2;
-        leaf.userData.closedZ = z;
         doorsGroup.add(leaf); doorLeaves.push(leaf);
         const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, T), material);
         mesh.position.set(0, h / 2, 0); mesh.renderOrder = 2; leaf.add(mesh);
@@ -250,19 +245,12 @@
         const texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
         const record = { canvas, texture, width, height, mirror }; drawDoorLabel(record); doorLabelRecords.push(record);
-        const bottomHinged = leaf.userData.openAxis === 'x';
-        const labelX = bottomHinged ? 0 : leaf.userData.direction * width / 2;
-        const labelY = bottomHinged ? height / 2 : 0;
-        const addLabel = (z, rotationY) => {
-          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 8.16), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: true, alphaTest: 0.01 }));
-          labelMesh.position.set(labelX, labelY, z);
-          labelMesh.rotation.y = rotationY;
-          labelMesh.renderOrder = 6;
-          leaf.add(labelMesh);
-        };
-        // The same opaque sticker is on both faces: it remains legible after opening.
-        addLabel(-T / 2 - 0.9, Math.PI);
-        addLabel(T / 2 + 0.9, 0);
+        // Наклейка на внешней стороне дверцы: не поворачивается к камере.
+        const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 8.16), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: false }));
+        labelMesh.position.set(leaf.userData.direction * width / 2, 0, -T / 2 - 0.9);
+        labelMesh.rotation.y = Math.PI;
+        labelMesh.renderOrder = 6;
+        leaf.add(labelMesh);
       }
       function plinthMeasureLabel(width, height, z, x = 0, part = '') {
         const canvas = document.createElement('canvas');
@@ -487,12 +475,11 @@
       rearSeam(new THREE.Vector3(entryPartition, innerBottom, D / 2 + 0.12), new THREE.Vector3(entryPartition, H - T, D / 2 + 0.12));
       rearSeam(new THREE.Vector3(reservePartition, innerBottom, D / 2 + 0.12), new THREE.Vector3(reservePartition, H - T, D / 2 + 0.12));
 
-      // E–H: four clear openings of exactly 250 mm from bottom to top.
-      const shoeClearHeight = 25;
-      const shoeShelfYs = Array.from({ length: 4 }, (_, index) => innerBottom + shoeClearHeight + T / 2 + index * (shoeClearHeight + T));
-      // A–D divide the remaining clear height equally.
-      const upperClearHeight = (H - T - (shoeShelfYs.at(-1) + T / 2) - T * 3) / 4;
-      const upperShelfYs = Array.from({ length: 3 }, (_, index) => shoeShelfYs.at(-1) + T / 2 + upperClearHeight + T / 2 + index * (upperClearHeight + T));
+      // A–C: по 25 см. D–F: по 35 см. Остаток делят поровну G и H.
+      // Снизу вверх: H/G/F = 24 см, E = 30 см. Так обувница отдаёт ровно 8 см цоколю.
+      // A, B, C и D по 350 мм; шесть миллиметров из A/B перенесены в E (306 мм).
+      const shoeShelfYs = [34.4, 60.0, 85.6, 117.8];
+      const upperShelfYs = [154.4, 191.0, 227.6];
       // Все полки оканчиваются перед оргалитом с технологическим зазором 2 мм:
       // поверхностей, входящих друг в друга, больше нет.
       shoeShelfYs.forEach(y => board(entryCenter, y, internalBoardZ, entryWidth, T, internalBoardDepth));
@@ -579,9 +566,7 @@
       // B — две створки на всю высоту.
       // В C полупрозрачная дверца закрывает только пространство над кошачьей нишей.
       const doorZ = -D / 2 - T / 2;
-      // Tall facades cover the upper 20 mm panel as well as the inner opening.
-      const facadeTop = H + 0.7;
-      const internalHeight = facadeTop - plinthH;
+      const internalHeight = H - T - plinthH;
       // Нижние фасады перекрывают лицевой торец днища и начинаются от цоколя.
       const shoeDoorBottom = plinthH;
       const shoeDoorTop = shoeShelfYs.at(-1) + T / 2;
@@ -599,19 +584,19 @@
       // Створка A/B опускается на верхний торец полки C и перекрывает его на 7 мм.
       // Фасад A/B перекрывает торец полки между B и C, а не оставляет его видимым.
       const upperDoorBottom = upperShelfYs[1] - T / 2 - 0.7;
-      const upperDoorTop = facadeTop;
+      const upperDoorTop = H - T;
       const upperDoorHeight = upperDoorTop - upperDoorBottom;
       const upperOuterLeaf = doorPanel(W / 2, (upperDoorBottom + upperDoorTop) / 2, doorZ, sideDoorWidth, upperDoorHeight, -1);
       const upperInnerLeaf = doorPanel(W / 2 - singleDoorWidth, (upperDoorBottom + upperDoorTop) / 2, doorZ, sideDoorWidth, upperDoorHeight, 1);
       const centerLeftDoor = reservePartition - T / 2;
       const centerRightDoor = entryPartition + T / 2;
       const centerDoorWidth = (hangingWidth + T * 2 - doorGap) / 2;
-      const centerDoorY = (plinthH + facadeTop) / 2;
+      const centerDoorY = (plinthH + H - T) / 2;
       const centerLeftLeaf = doorPanel(centerLeftDoor, centerDoorY, doorZ, centerDoorWidth, internalHeight, 1, centerDoorMaterials);
       const centerRightLeaf = doorPanel(centerRightDoor, centerDoorY, doorZ, centerDoorWidth, internalHeight, -1, centerDoorMaterials);
       // Левая секция: верхний фасад также разделён на две распашные створки.
       const rightDoorBottom = upperCatBottom - 0.7;
-      const rightDoorHeight = facadeTop - rightDoorBottom;
+      const rightDoorHeight = H - T - rightDoorBottom;
       const reserveOuterLeaf = doorPanel(-W / 2, rightDoorBottom + rightDoorHeight / 2, doorZ, reserveDoorWidth, rightDoorHeight, 1);
       const reserveInnerLeaf = doorPanel(-W / 2 + rightDoorWidth, rightDoorBottom + rightDoorHeight / 2, doorZ, reserveDoorWidth, rightDoorHeight, -1);
       // Нижняя правая створка открывается вниз: ось и обе петли находятся снизу.
@@ -640,7 +625,6 @@
       mirrorHighlight(centerRightLeaf, centerDoorWidth, internalHeight);
       doorMeasureLabel(reserveOuterLeaf, reserveDoorWidth, rightDoorHeight);
       doorMeasureLabel(reserveInnerLeaf, reserveDoorWidth, rightDoorHeight);
-      doorMeasureLabel(lowerRightDoor, rightDoorWidth, lowerRightDoorHeight);
       // Петли вертикальных створок видны только с внутренней стороны.
       doorHinges(shoeOuterLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
       doorHinges(shoeInnerLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
@@ -790,11 +774,7 @@
       function setDoorState() {
         doorLeaves.forEach(leaf => {
           leaf.rotation.set(0, 0, 0);
-          leaf.position.z = leaf.userData.closedZ;
-          if (doorsOpen) {
-            leaf.rotation[leaf.userData.openAxis || 'y'] = leaf.userData.openRotation;
-            leaf.position.z += leaf.userData.openDepthOffset || 0;
-          }
+          if (doorsOpen) leaf.rotation[leaf.userData.openAxis || 'y'] = leaf.userData.openRotation;
         });
       }
       setDoorState();
