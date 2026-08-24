@@ -174,6 +174,7 @@
         mesh.position.set(direction * w / 2, 0, 0); mesh.renderOrder = 2; leaf.add(mesh);
         const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), doorEdge);
         outline.position.copy(mesh.position); outline.renderOrder = 3; outline.visible = false; leaf.add(outline);
+        leaf.userData.outline = outline;
         return leaf;
       }
       function bottomHingedDoor(x, bottom, z, w, h, material = doorMaterial) {
@@ -254,7 +255,7 @@
         const labelX = bottomHinged ? 0 : leaf.userData.direction * width / 2;
         const labelY = bottomHinged ? height / 2 : 0;
         const addLabel = (z, rotationY) => {
-          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 8.16), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: true, alphaTest: 0.01 }));
+          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 8.16), new THREE.MeshBasicMaterial({ map: texture, transparent: false, side: THREE.FrontSide, depthTest: true, depthWrite: true, alphaTest: 0.01 }));
           labelMesh.position.set(labelX, labelY, z);
           labelMesh.rotation.y = rotationY;
           labelMesh.renderOrder = 6;
@@ -490,9 +491,14 @@
       // E–H: four clear openings of exactly 250 mm from bottom to top.
       const shoeClearHeight = 25;
       const shoeShelfYs = Array.from({ length: 4 }, (_, index) => innerBottom + shoeClearHeight + T / 2 + index * (shoeClearHeight + T));
-      // A–D divide the remaining clear height equally.
-      const upperClearHeight = (H - T - (shoeShelfYs.at(-1) + T / 2) - T * 3) / 4;
-      const upperShelfYs = Array.from({ length: 3 }, (_, index) => shoeShelfYs.at(-1) + T / 2 + upperClearHeight + T / 2 + index * (upperClearHeight + T));
+      // Bottom to top: D/C are 350 mm, B/A are 310 mm clear openings.
+      const upperClearHeights = [35, 35, 31, 31];
+      let upperOpeningBottom = shoeShelfYs.at(-1) + T / 2;
+      const upperShelfYs = upperClearHeights.slice(0, -1).map(clearHeight => {
+        const shelfY = upperOpeningBottom + clearHeight + T / 2;
+        upperOpeningBottom = shelfY + T / 2;
+        return shelfY;
+      });
       // Все полки оканчиваются перед оргалитом с технологическим зазором 2 мм:
       // поверхностей, входящих друг в друга, больше нет.
       shoeShelfYs.forEach(y => board(entryCenter, y, internalBoardZ, entryWidth, T, internalBoardDepth));
@@ -673,15 +679,15 @@
       dimensions.children.splice(doorDimStart).forEach(item => doorDimensions.add(item));
       // Левая обувница: три реальные чистые высоты между соседними полками.
       const shoeGaps = [[innerBottom, shoeShelfYs[0] - T / 2], ...shoeShelfYs.slice(1).map((y, index) => [shoeShelfYs[index] + T / 2, y - T / 2])];
+      const entryVisualLeft = W / 2 - T;
+      const entryMarkerX = entryVisualLeft - 25;
       shoeGaps.forEach(([bottom, top]) => {
-        dimY(entryPartition + 7, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, entryPartition + 15, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
+        dimY(entryMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, entryMarkerX - 8, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
       });
       // Полки выше обувницы: каждый подписанный просвет расположен между своими полками.
       const upperShelfGaps = [[shoeShelfYs.at(-1) + T / 2, upperShelfYs[0] - T / 2], ...upperShelfYs.slice(1).map((y, index) => [upperShelfYs[index] + T / 2, y - T / 2]), [upperShelfYs.at(-1) + T / 2, H - T]];
-      upperShelfGaps.forEach(([bottom, top], index) => {
-        // Снизу вверх: E, D, C, B, A. C/D и A/B — две отдельные вертикали.
-        const verticalX = index === 0 ? entryPartition + 21 : index <= 2 ? entryPartition + 7 : entryPartition + 14;
-        dimY(verticalX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, verticalX + 8, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
+      upperShelfGaps.forEach(([bottom, top]) => {
+        dimY(entryMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, entryMarkerX - 8, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
       });
       // В каждом прямоугольнике A своя горизонтальная ширина.
       [...shoeGaps, ...upperShelfGaps].forEach(([bottom, top]) => {
@@ -689,7 +695,7 @@
         dimX(entryPartition + T / 2, W / 2 - T, mid, frontZ, `${entryWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
       });
       // Центральная секция: отдельная высота штанги; размеры проёмов ниже.
-      const rodY = upperCenterShelfY - T / 2 - 7;
+      const rodY = upperCenterShelfY - T / 2 - 10;
       const rodZ = 0; // штанга и её измеритель лежат по центру глубины корпуса
       const centerLeft = reservePartition + T / 2;
       const centerRight = entryPartition - T / 2;
@@ -697,31 +703,33 @@
       const rodText = (lang = language) => `${(rodY - lowerShelfTop).toFixed(1)} ${lang === 'az' ? 'sm — asqı borusu' : 'см — штанга'}`;
       // Указатель штанги ходит вдоль неё и цепляется за её доли, а верхняя стрелка
       // останавливается под трубой, не проходя сквозь неё.
-      // Keep the rod annotation 15% of the section width from the full-height marker.
-      const rodDimensionX = centerLeft + 5 + hangingWidth * 0.15;
+      // The J marker is 25% from screen-left; the rod marker sits at 35%.
+      const rodDimensionX = centerRight - hangingWidth * 0.35;
       const rodDimension = dimY(rodDimensionX, lowerShelfTop, rodY - 1.8, rodZ, rodText(), centerLeft + 30, 5.2, rodText, [centerLeft, centerRight]);
       // В каждом прямоугольнике B — своя ширина и своя высота.
       const centerOpenings = [[innerBottom, lowerCenterShelfY - T / 2], [lowerCenterShelfY + T / 2, upperCenterShelfY - T / 2], [upperCenterShelfY + T / 2, H - T]];
       centerOpenings.forEach(([bottom, top], index) => {
         const mid = (bottom + top) / 2;
         dimX(centerLeft, centerRight, mid, frontZ, `${hangingWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
-        dimY(index === 1 ? centerRight - 8 : centerRight - 14, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, centerRight - (index === 1 ? 20 : 26), 5.0);
+        const centerMarkerX = centerRight - 25;
+        dimY(centerMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, centerMarkerX - 8, 5.0);
       });
       // C: нижняя ниша и каждый прямоугольник M/N получают обе размерные стрелки.
       const catHalfWidth = (reserveWidth - T) / 2;
       dimX(reserveLeft, reserveRight, (innerBottom + catShelfY - T / 2) / 2, frontZ, `${catWidth.toFixed(1)} см`, 28, [innerBottom, catShelfY - T / 2]);
       // L владеет всей нижней правой нишей; его линия не может уйти в левую
       // половину верхних ячеек или за внутреннюю опорную перегородку.
-      dimY(reserveRight - 7, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveRight - 15, 5.4, null, [reserveLeft, reserveRight]);
+      const reserveMarkerX = reserveRight - 25;
+      dimY(reserveMarkerX, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveMarkerX - 8, 5.4, null, [reserveLeft, reserveRight]);
       [[reserveLeft, reserveCenter - T / 2], [reserveCenter + T / 2, reserveRight]].forEach(([x1, x2], index) => {
         catUpperOpenings.forEach(([bottom, top], row) => {
           const height = top - bottom;
           // Горизонтальная отметка стоит в нижней четверти своей ячейки.
           const horizontalY = bottom + height * 0.25;
           dimX(x1, x2, horizontalY, frontZ, `${catHalfWidth.toFixed(1)} см`, horizontalY + 6, [bottom, top], true);
-          // In the front view, screen-left maps to the larger X coordinate.
-          const vectorX = x2 - (x2 - x1) * 0.25;
-          dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX + 10, 4.8, null, [x1, x2], null, true);
+          // Every vertical marker is 250 mm from its screen-left edge.
+          const vectorX = x2 - 25;
+          dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX - 8, 4.8, null, [x1, x2], null, true);
         });
       });
 
@@ -791,6 +799,7 @@
         doorLeaves.forEach(leaf => {
           leaf.rotation.set(0, 0, 0);
           leaf.position.z = leaf.userData.closedZ;
+          if (leaf.userData.outline) leaf.userData.outline.visible = doorsOpen;
           if (doorsOpen) {
             leaf.rotation[leaf.userData.openAxis || 'y'] = leaf.userData.openRotation;
             leaf.position.z += leaf.userData.openDepthOffset || 0;
