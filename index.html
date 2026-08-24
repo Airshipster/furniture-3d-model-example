@@ -7,14 +7,14 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Шкаф для ниши — 3D-модель">
   <meta property="og:description" content="Интерактивная 3D-модель мебели с размерами для демонстрации мастерам.">
-  <meta property="og:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-2.png">
-  <meta property="og:image:secure_url" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-2.png">
+  <meta property="og:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
+  <meta property="og:image:secure_url" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="2320">
   <meta property="og:image:height" content="1463">
   <meta property="og:site_name" content="Furniture 3D Model Example">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-2.png">
+  <meta name="twitter:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
   <style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
@@ -49,8 +49,8 @@
 </head>
 <body>
   <header>
-    <div><h1 id="title">Шкаф для ниши</h1><button id="info-toggle" class="info-toggle" type="button">Информация</button><section id="info-panel" class="info-panel"><button id="info-close" class="info-close" type="button" aria-label="Закрыть информацию">×</button><h2 id="info-heading">Информация</h2><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p><p id="measure-note">Размеры указаны в миллиметрах</p><strong id="dimensions-title">2970 × 550 × 2650 мм</strong><span id="dimensions-note">Высота 2650 мм.</span><span id="depth-note">Корпус 534 мм, ЛДСП 16 мм, задняя стенка 3,2 мм.</span><span id="mount-note">Корпус необходимо закрепить к стене.</span></section></div>
-    <div class="controls" aria-label="Вид макета"><button id="front" type="button">Вид спереди</button><button id="iso" type="button" aria-pressed="true">Изометрия</button><button id="doors" type="button" aria-pressed="false">Закрыть дверцы</button><button id="hide-doors" type="button" aria-pressed="false">Скрыть дверцы</button><button id="snapshot" type="button">Сохранить PNG</button><button id="lang" type="button">AZ</button></div>
+    <div><h1 id="title">Шкаф для ниши</h1><button id="info-toggle" class="info-toggle" type="button">Информация</button><section id="info-panel" class="info-panel"><button id="info-close" class="info-close" type="button" aria-label="Закрыть информацию">×</button><h2 id="info-heading">Информация</h2><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p><p id="measure-note">Размеры указаны в миллиметрах</p><strong id="dimensions-title">2900 × 520 × 2600 мм</strong><span id="dimensions-note">Высота 2600 мм.</span><span id="depth-note">Корпус 504 мм, ЛДСП 16 мм, задняя стенка 3,2 мм.</span><span id="mount-note">Корпус необходимо закрепить к стене.</span></section></div>
+    <div class="controls" aria-label="Вид макета"><button id="front" type="button">Вид спереди</button><button id="iso" type="button" aria-pressed="true">Изометрия</button><button id="doors" type="button" aria-pressed="false">Закрыть дверцы</button><button id="hide-doors" type="button" aria-pressed="false">Скрыть дверцы</button><button id="snapshot" type="button">Сохранить PNG</button><button id="edit-dimensions" type="button" aria-pressed="false">Править указатели</button><button id="reset-dimensions" type="button" hidden>Сбросить указатели</button><button id="lang" type="button">AZ</button></div>
   </header>
   <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
   <div class="touch-hint" id="touch-hint">Для навигации используйте два пальца</div>
@@ -59,8 +59,8 @@
   <div class="fallback" id="fallback">Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.</div>
   <script type="importmap">
     { "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/"
+      "three": "./node_modules/three/build/three.module.js",
+      "three/addons/": "./node_modules/three/examples/jsm/"
     } }
   </script>
   <script type="module">
@@ -72,11 +72,11 @@
     let language = new URLSearchParams(location.search).has('az') ? 'az' : 'ru';
     try {
       // Корпусный вариант: ЛДСП 16 мм, фасады той же толщины.
-      const W = 297, totalD = 55, T = 1.6, D = totalD - T, H = 265;
+      const W = 290, totalD = 52, T = 1.6, D = totalD - T, H = 260;
       const rearT = 0.32;
       // Внутренние детали не пересекают оргалит: оставлен технологический зазор 2 мм.
       const rearClearance = 0.2, internalBoardDepth = D - rearT - rearClearance, internalBoardZ = -(D - internalBoardDepth) / 2;
-      // Скрытый цоколь: общая высота остаётся 265 см, корпус начинается на 8 см выше пола.
+      // Скрытый цоколь: общая высота остаётся 260 см, корпус начинается на 8 см выше пола.
       const plinthH = 8, innerBottom = plinthH + T;
       const scene = new THREE.Scene();
       // Камера не подходит ближе 250 см, поэтому близкая плоскость 10 см безопасна
@@ -172,6 +172,18 @@
         outline.position.copy(mesh.position); outline.renderOrder = 3; outline.visible = false; leaf.add(outline);
         return leaf;
       }
+      function bottomHingedDoor(x, bottom, z, w, h, material = doorMaterial) {
+        const leaf = new THREE.Group();
+        leaf.position.set(x, bottom, z);
+        leaf.userData.openAxis = 'x';
+        leaf.userData.openRotation = -Math.PI / 2;
+        doorsGroup.add(leaf); doorLeaves.push(leaf);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, T), material);
+        mesh.position.set(0, h / 2, 0); mesh.renderOrder = 2; leaf.add(mesh);
+        const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), doorEdge);
+        outline.position.copy(mesh.position); outline.renderOrder = 3; outline.visible = false; leaf.add(outline);
+        return leaf;
+      }
       const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x535b63, roughness: 0.32, metalness: 0.85 });
       function doorHandle(leaf, x, y = 0, z = -1.2) {
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 22, 18), handleMaterial);
@@ -195,6 +207,18 @@
           const plate = new THREE.Mesh(new THREE.BoxGeometry(0.45, 4.8, 3.2), hingeMaterial);
           plate.position.set(leaf.position.x + leaf.userData.direction * T / 2, leaf.position.y + y, -D / 2 + T / 2 + 0.1);
           plate.castShadow = true; cabinet.add(plate);
+        });
+      }
+      function bottomDoorHinges(leaf, width) {
+        const hingeMaterial = new THREE.MeshStandardMaterial({ color: 0x3e474d, roughness: 0.28, metalness: 0.88 });
+        [-0.34, 0.34].forEach(fraction => {
+          const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 6, 16), hingeMaterial);
+          pin.rotation.z = Math.PI / 2;
+          pin.position.set(width * fraction, 0, T / 2 + 0.14);
+          leaf.add(pin);
+          const plate = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.5, 3.2), hingeMaterial);
+          plate.position.set(leaf.position.x + width * fraction, leaf.position.y + T / 2, -D / 2 + T / 2 + 0.1);
+          cabinet.add(plate);
         });
       }
       const doorLabelRecords = [];
@@ -254,13 +278,12 @@
       const measureArrow = new THREE.MeshBasicMaterial({ color: 0xf1b760 });
       let currentDimensionGroup = null;
       let dimensionNumber = 0;
-      // Расстановка размерных линий, утверждённая в локальном макете.
-      const fixedDimensionOffsets = { "dimension-22": -8.749999999999972, "dimension-16": 62.39999999999999, "dimension-24": -8.749999999999972, "dimension-15": 69.39999999999999, "dimension-23": -8.75, "dimension-14": 69.39999999999999, "dimension-13": 55.39999999999999, "dimension-21": -8.75, "dimension-20": -7.6499999999999915, "dimension-19": -6, "dimension-18": -6.000000000000007, "dimension-17": -6.000000000000002, "dimension-9": 69.39999999999999, "dimension-10": 69.39999999999999, "dimension-0": 0, "dimension-11": 69.39999999999999, "dimension-12": 69.39999999999999, "dimension-30": -8.75, "dimension-31": 0, "dimension-5": -80.39999999999999, "dimension-4": 0, "dimension-28": -45.14999999999998, "dimension-25": 78.45000000000002, "dimension-29": -6, "dimension-26": -8.75, "dimension-27": 0, "dimension-32": -16.25, "dimension-33": -2.799999999999997, "dimension-6": -5, "dimension-40": -41.349999999999994, "dimension-34": -41.349999999999994, "dimension-8": 76.6, "dimension-35": 23.400000000000006, "dimension-41": -3.799999999999997, "dimension-44": 7, "dimension-42": 6.650000000000034, "dimension-38": 7, "dimension-36": 6.650000000000034, "dimension-37": 23.400000000000006, "dimension-39": 23.400000000000006, "dimension-45": -3.799999999999997, "dimension-43": -3.799999999999997, "dimension-7": -26.25 };
+      // Расстановка размерных линий, подтверждённая в локальном макете, зафиксирована и для Pages.
       function addDimensionObject(object) { (currentDimensionGroup || dimensions).add(object); }
       function startDimension(axis) {
         const group = new THREE.Group();
         group.userData = { draggableDimension: true, axis, id: `dimension-${dimensionNumber++}` };
-        const saved = fixedDimensionOffsets[group.userData.id];
+        const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v5') || '{}')[group.userData.id];
         group.userData.hasSavedOffset = typeof saved === 'number';
         if (group.userData.hasSavedOffset) group.position[axis] = saved;
         dimensions.add(group);
@@ -378,9 +401,9 @@
       const plinthFrontZ = -D / 2 + 2 + T / 2;
       // Внешние стороны — только компактные наклейки в формате дверей, без оранжевых полос.
       // Верхняя карточка лежит на другой стороне, как физически перевёрнутая визитка.
-      surfaceMeasureLabel('surface-top', 'top', '2970 × 534 мм', 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
-      surfaceMeasureLabel('surface-left', 'left', '534 × 2650 мм', -W / 2 - 0.32, H / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
-      surfaceMeasureLabel('surface-right', 'right', '534 × 2650 мм', W / 2 + 0.32, H / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
+      surfaceMeasureLabel('surface-top', 'top', `${Math.round(W * 10)} × ${Math.round(D * 10)} мм`, 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
+      surfaceMeasureLabel('surface-left', 'left', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, -W / 2 - 0.32, H / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
+      surfaceMeasureLabel('surface-right', 'right', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, W / 2 + 0.32, H / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
 
       // Во фронтальном виде: слева секция с обувницей 82 см, центр — штанга,
       // справа — открытая секция 80 см для домика кошки.
@@ -542,55 +565,65 @@
       const singleDoorWidth = entryWidth + T - 0.3;
       const rightDoorWidth = reserveWidth + T - 0.3;
       const doorGap = 0.3;
-      // Экранная левая сторона соответствует положительной X: петли обеих левых дверей там.
-      const shoeDoor = doorPanel(W / 2, (shoeDoorBottom + shoeDoorTop) / 2, doorZ, singleDoorWidth, shoeDoorHeight, -1);
+      const sideDoorWidth = (singleDoorWidth - doorGap) / 2;
+      const reserveDoorWidth = (rightDoorWidth - doorGap) / 2;
+      // Правая секция: каждый фасад состоит из двух распашных створок.
+      const shoeOuterLeaf = doorPanel(W / 2, (shoeDoorBottom + shoeDoorTop) / 2, doorZ, sideDoorWidth, shoeDoorHeight, -1);
+      const shoeInnerLeaf = doorPanel(W / 2 - singleDoorWidth, (shoeDoorBottom + shoeDoorTop) / 2, doorZ, sideDoorWidth, shoeDoorHeight, 1);
       // Створка A/B опускается на верхний торец полки C и перекрывает его на 7 мм.
       // Фасад A/B перекрывает торец полки между B и C, а не оставляет его видимым.
       const upperDoorBottom = upperShelfYs[1] - T / 2 - 0.7;
       const upperDoorTop = H - T;
       const upperDoorHeight = upperDoorTop - upperDoorBottom;
-      const upperDoor = doorPanel(W / 2, (upperDoorBottom + upperDoorTop) / 2, doorZ, singleDoorWidth, upperDoorHeight, -1);
+      const upperOuterLeaf = doorPanel(W / 2, (upperDoorBottom + upperDoorTop) / 2, doorZ, sideDoorWidth, upperDoorHeight, -1);
+      const upperInnerLeaf = doorPanel(W / 2 - singleDoorWidth, (upperDoorBottom + upperDoorTop) / 2, doorZ, sideDoorWidth, upperDoorHeight, 1);
       const centerLeftDoor = reservePartition - T / 2;
       const centerRightDoor = entryPartition + T / 2;
       const centerDoorWidth = (hangingWidth + T * 2 - doorGap) / 2;
       const centerDoorY = (plinthH + H - T) / 2;
       const centerLeftLeaf = doorPanel(centerLeftDoor, centerDoorY, doorZ, centerDoorWidth, internalHeight, 1, centerDoorMaterials);
       const centerRightLeaf = doorPanel(centerRightDoor, centerDoorY, doorZ, centerDoorWidth, internalHeight, -1, centerDoorMaterials);
-      // Две правые створки перекрывают общую горизонтальную полку по 7 мм,
-      // оставляя между собой технологическую щель 2 мм.
+      // Левая секция: верхний фасад также разделён на две распашные створки.
       const rightDoorBottom = upperCatBottom - 0.7;
       const rightDoorHeight = H - T - rightDoorBottom;
-      const rightDoor = doorPanel(-W / 2, rightDoorBottom + rightDoorHeight / 2, doorZ, rightDoorWidth, rightDoorHeight, 1);
-      // L: отдельная нижняя дверца под верхней правой дверью.
+      const reserveOuterLeaf = doorPanel(-W / 2, rightDoorBottom + rightDoorHeight / 2, doorZ, reserveDoorWidth, rightDoorHeight, 1);
+      const reserveInnerLeaf = doorPanel(-W / 2 + rightDoorWidth, rightDoorBottom + rightDoorHeight / 2, doorZ, reserveDoorWidth, rightDoorHeight, -1);
+      // Нижняя правая створка открывается вниз: ось и обе петли находятся снизу.
       const lowerRightDoorHeight = catShelfY - T / 2 + 0.7 - plinthH;
-      const lowerRightDoor = doorPanel(-W / 2, plinthH + lowerRightDoorHeight / 2, doorZ, rightDoorWidth, lowerRightDoorHeight, 1);
+      const lowerRightDoor = bottomHingedDoor(-W / 2 + rightDoorWidth / 2, plinthH, doorZ, rightDoorWidth, lowerRightDoorHeight);
       // Зеркальные центральные створки: ручки у встречных краёв.
-      // У левых дверей ручки справа. У правой — справа, петли слева.
-      doorHandle(shoeDoor, -singleDoorWidth + 3);
-      doorHandle(upperDoor, -singleDoorWidth + 3);
+      // Ручки всех пар стоят у встречных краёв.
+      doorHandle(shoeOuterLeaf, -sideDoorWidth + 3);
+      doorHandle(shoeInnerLeaf, sideDoorWidth - 3);
+      doorHandle(upperOuterLeaf, -sideDoorWidth + 3);
+      doorHandle(upperInnerLeaf, sideDoorWidth - 3);
       doorHandle(centerLeftLeaf, centerDoorWidth - 1.8);
       doorHandle(centerRightLeaf, -centerDoorWidth + 1.8);
-      doorHandle(rightDoor, rightDoorWidth - 3);
-      doorHandle(lowerRightDoor, rightDoorWidth - 3);
+      doorHandle(reserveOuterLeaf, reserveDoorWidth - 3);
+      doorHandle(reserveInnerLeaf, -reserveDoorWidth + 3);
+      doorHandle(lowerRightDoor, 0, lowerRightDoorHeight / 2, -1.2);
       // Размеры размещены на внутренней стороне каждой дверцы и видны в распахнутом состоянии.
-      doorMeasureLabel(shoeDoor, singleDoorWidth, shoeDoorHeight);
-      doorMeasureLabel(upperDoor, singleDoorWidth, upperDoorHeight);
+      doorMeasureLabel(shoeOuterLeaf, sideDoorWidth, shoeDoorHeight);
+      doorMeasureLabel(shoeInnerLeaf, sideDoorWidth, shoeDoorHeight);
+      doorMeasureLabel(upperOuterLeaf, sideDoorWidth, upperDoorHeight);
+      doorMeasureLabel(upperInnerLeaf, sideDoorWidth, upperDoorHeight);
       doorMeasureLabel(centerLeftLeaf, centerDoorWidth, internalHeight, true);
       doorMeasureLabel(centerRightLeaf, centerDoorWidth, internalHeight, true);
       mirrorHighlight(centerLeftLeaf, centerDoorWidth, internalHeight);
       mirrorHighlight(centerRightLeaf, centerDoorWidth, internalHeight);
-      doorMeasureLabel(rightDoor, rightDoorWidth, rightDoorHeight);
-      doorMeasureLabel(lowerRightDoor, rightDoorWidth, lowerRightDoorHeight);
-      // Петли видны только с внутренней стороны: слева по две, остальные — по три.
-      // Петли нижней створки стоят в свободных зонах H и E, не напротив полки G–H.
-      doorHinges(shoeDoor, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
-      doorHinges(upperDoor, 0, upperDoorHeight, 2);
+      doorMeasureLabel(reserveOuterLeaf, reserveDoorWidth, rightDoorHeight);
+      doorMeasureLabel(reserveInnerLeaf, reserveDoorWidth, rightDoorHeight);
+      // Петли вертикальных створок видны только с внутренней стороны.
+      doorHinges(shoeOuterLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
+      doorHinges(shoeInnerLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
+      doorHinges(upperOuterLeaf, 0, upperDoorHeight, 2);
+      doorHinges(upperInnerLeaf, 0, upperDoorHeight, 2);
       // Крайние петли центральных зеркальных створок стоят в K и I, не на полках.
       doorHinges(centerLeftLeaf, 0, internalHeight, 3, [-0.43, 0, 0.43]);
       doorHinges(centerRightLeaf, 0, internalHeight, 3, [-0.43, 0, 0.43]);
-      // Верхняя петля в O, нижняя симметрично в M; средняя остаётся на прежней высоте.
-      doorHinges(rightDoor, 0, rightDoorHeight, 3, [-0.44, 0, 0.44]);
-      doorHinges(lowerRightDoor, 0, lowerRightDoorHeight, 2);
+      doorHinges(reserveOuterLeaf, 0, rightDoorHeight, 3, [-0.44, 0, 0.44]);
+      doorHinges(reserveInnerLeaf, 0, rightDoorHeight, 3, [-0.44, 0, 0.44]);
+      bottomDoorHinges(lowerRightDoor, rightDoorWidth);
 
       // Размерные линии: каждая внутренняя стрелка стоит в своём реальном проёме.
       // Все рабочие оранжевые размеры находятся на 15 см внутри корпуса.
@@ -599,16 +632,16 @@
       // Габариты самих фасадов: ширина и высота каждой дверцы, не только проёмов.
       const doorDimStart = dimensions.children.length;
       const measureCenterLeft = reservePartition + T / 2;
-      const shoeDoorWidth = singleDoorWidth;
-      dimX(W / 2 - singleDoorWidth, W / 2, shoeDoorHeight / 2, frontZ - 4, `${shoeDoorWidth.toFixed(1)} см — дверца`, shoeDoorHeight / 2 + 7, [shoeDoorBottom, shoeDoorTop]);
-      dimY(W / 2 - 8, shoeDoorBottom, shoeDoorTop, frontZ - 4, `${shoeDoorHeight.toFixed(1)} см — дверца`, W / 2 - 20, 5.4);
-      dimX(W / 2 - singleDoorWidth, W / 2, (upperDoorBottom + upperDoorTop) / 2, frontZ - 4, `${shoeDoorWidth.toFixed(1)} см — дверца`, (upperDoorBottom + upperDoorTop) / 2 + 7, [upperDoorBottom, upperDoorTop]);
-      dimY(W / 2 - 8, upperDoorBottom, upperDoorTop, frontZ - 4, `${upperDoorHeight.toFixed(1)} см — дверца`, W / 2 - 20, 5.4);
+      const shoeDoorWidth = sideDoorWidth;
+      dimX(W / 2 - singleDoorWidth, W / 2 - sideDoorWidth - doorGap, shoeDoorHeight / 2, frontZ - 4, `${shoeDoorWidth.toFixed(1)} см — створка`, shoeDoorHeight / 2 + 7, [shoeDoorBottom, shoeDoorTop]);
+      dimY(W / 2 - 8, shoeDoorBottom, shoeDoorTop, frontZ - 4, `${shoeDoorHeight.toFixed(1)} см — две створки`, W / 2 - 20, 5.4);
+      dimX(W / 2 - singleDoorWidth, W / 2 - sideDoorWidth - doorGap, (upperDoorBottom + upperDoorTop) / 2, frontZ - 4, `${shoeDoorWidth.toFixed(1)} см — створка`, (upperDoorBottom + upperDoorTop) / 2 + 7, [upperDoorBottom, upperDoorTop]);
+      dimY(W / 2 - 8, upperDoorBottom, upperDoorTop, frontZ - 4, `${upperDoorHeight.toFixed(1)} см — две створки`, W / 2 - 20, 5.4);
       dimX(centerLeftDoor, centerLeftDoor + centerDoorWidth, centerDoorY, frontZ - 4, `${centerDoorWidth.toFixed(1)} см`, centerDoorY + 7, [plinthH, H - T]);
       dimX(centerRightDoor - centerDoorWidth, centerRightDoor, centerDoorY, frontZ - 4, `${centerDoorWidth.toFixed(1)} см`, centerDoorY + 7, [plinthH, H - T]);
       dimY(measureCenterLeft + 5, plinthH, H - T, frontZ - 4, `${internalHeight.toFixed(1)} см — створки`, measureCenterLeft + 17, 5.0);
-      dimX(reserveLeft - T, reserveRight - 0.3, rightDoorBottom + rightDoorHeight / 2, frontZ - 4, `${rightDoorWidth.toFixed(1)} см — дверца`, rightDoorBottom + rightDoorHeight / 2 + 7, [rightDoorBottom, H - T]);
-      dimY(reserveLeft + 5, rightDoorBottom, H - T, frontZ - 4, `${rightDoorHeight.toFixed(1)} см — дверца`, reserveLeft + 17, 5.0);
+      dimX(reserveLeft - T, reserveLeft + reserveDoorWidth, rightDoorBottom + rightDoorHeight / 2, frontZ - 4, `${reserveDoorWidth.toFixed(1)} см — створка`, rightDoorBottom + rightDoorHeight / 2 + 7, [rightDoorBottom, H - T]);
+      dimY(reserveLeft + 5, rightDoorBottom, H - T, frontZ - 4, `${rightDoorHeight.toFixed(1)} см — две створки`, reserveLeft + 17, 5.0);
       dimensions.children.splice(doorDimStart).forEach(item => doorDimensions.add(item));
       // Левая обувница: три реальные чистые высоты между соседними полками.
       const shoeGaps = [[innerBottom, shoeShelfYs[0] - T / 2], ...shoeShelfYs.slice(1).map((y, index) => [shoeShelfYs[index] + T / 2, y - T / 2])];
@@ -723,7 +756,10 @@
       // По умолчанию фасады физически распахнуты на 90°; при закрытии встают в фасад.
       let doorsOpen = true;
       function setDoorState() {
-        doorLeaves.forEach(leaf => { leaf.rotation.y = doorsOpen ? leaf.userData.openRotation : 0; });
+        doorLeaves.forEach(leaf => {
+          leaf.rotation.set(0, 0, 0);
+          if (doorsOpen) leaf.rotation[leaf.userData.openAxis || 'y'] = leaf.userData.openRotation;
+        });
       }
       setDoorState();
       doorDimensions.visible = false;
@@ -749,8 +785,8 @@
         link.download = 'maket-shkafa.png'; link.href = renderer.domElement.toDataURL('image/png'); link.click();
       });
       const translations = {
-        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', touchHint: 'Для навигации используйте два пальца', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 2970 мм × глубина 550 мм × высота 2650 мм', dimensionsNote: 'Высота 2650 мм.', depthNote: 'Корпус: 534 мм; ЛДСП: 16 мм; задняя стенка: 3,2 мм.', mount: 'Корпус необходимо закрепить к стене.', measure: 'Размеры указаны в миллиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
-        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', touchHint: 'Naviqasiya üçün iki barmaqdan istifadə edin', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 2970 mm × dərinlik 550 mm × hündürlük 2650 mm', dimensionsNote: 'Hündürlük 2650 mm-dir.', depthNote: 'Korpus: 534 mm; LDP: 16 mm; arxa divar: 3,2 mm.', mount: 'Korpusu divara bərkitmək vacibdir.', measure: 'Ölçülər millimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
+        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', touchHint: 'Для навигации используйте два пальца', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 2900 мм × глубина 520 мм × высота 2600 мм', dimensionsNote: 'Высота 2600 мм.', depthNote: 'Корпус: 504 мм; ЛДСП: 16 мм; задняя стенка: 3,2 мм.', mount: 'Корпус необходимо закрепить к стене.', measure: 'Размеры указаны в миллиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
+        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', touchHint: 'Naviqasiya üçün iki barmaqdan istifadə edin', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 2900 mm × dərinlik 520 mm × hündürlük 2600 mm', dimensionsNote: 'Hündürlük 2600 mm-dir.', depthNote: 'Korpus: 504 mm; LDP: 16 mm; arxa divar: 3,2 mm.', mount: 'Korpusu divara bərkitmək vacibdir.', measure: 'Ölçülər millimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
       };
       function applyLanguage(updateUrl = false) {
         const t = translations[language];
@@ -841,8 +877,8 @@
         // курсор не превращается в крест, а пустое место свободно вращает камеру.
         renderer.domElement.style.cursor = 'grab';
       }
-      editDimensionsButton?.addEventListener('click', () => setDimensionEditing(!dimensionEditing));
-      resetDimensionsButton?.addEventListener('click', () => {
+      editDimensionsButton.addEventListener('click', () => setDimensionEditing(!dimensionEditing));
+      resetDimensionsButton.addEventListener('click', () => {
         localStorage.removeItem('wardrobe-dimension-offsets-v5');
         dimensions.traverse(group => { if (group.userData.draggableDimension) group.position[group.userData.axis] = 0; });
         if (location.hostname === '127.0.0.1') fetch('/layout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offsets: {} }), keepalive: true }).catch(() => {});
@@ -934,8 +970,6 @@
       (function draw() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(draw); })();
     } catch (error) {
       console.error(error);
-      document.getElementById('loading').hidden = true;
-      fallback.textContent = `Не удалось запустить 3D-сцену: ${error?.message || error}`;
       fallback.style.display = 'grid';
     }
   </script>
