@@ -49,7 +49,7 @@
 </head>
 <body>
   <header>
-    <div><h1 id="title">Шкаф для ниши</h1><button id="info-toggle" class="info-toggle" type="button">Информация</button><section id="info-panel" class="info-panel"><button id="info-close" class="info-close" type="button" aria-label="Закрыть информацию">×</button><h2 id="info-heading">Информация</h2><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p><p id="measure-note">Размеры указаны в миллиметрах</p><strong id="dimensions-title">2900 × 520 × 2600 мм</strong><span id="dimensions-note">Высота 2600 мм.</span><span id="depth-note">Корпус 500 мм, ЛДСП 20 мм, задняя стенка 3,2 мм.</span><span id="mount-note">Корпус необходимо закрепить к стене.</span></section></div>
+    <div><h1 id="title">Шкаф для ниши</h1><button id="info-toggle" class="info-toggle" type="button">Информация</button><section id="info-panel" class="info-panel"><button id="info-close" class="info-close" type="button" aria-label="Закрыть информацию">×</button><h2 id="info-heading">Информация</h2><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p><p id="measure-note">Размеры указаны в миллиметрах</p><strong id="dimensions-title">2900 × 520 × 2600 мм</strong><span id="dimensions-note">Высота 2600 мм.</span><span id="depth-note">Корпус 504 мм, ЛДСП 16 мм, задняя стенка 3,2 мм.</span><span id="mount-note">Корпус необходимо закрепить к стене.</span></section></div>
     <div class="controls" aria-label="Вид макета"><button id="front" type="button">Вид спереди</button><button id="iso" type="button" aria-pressed="true">Изометрия</button><button id="doors" type="button" aria-pressed="false">Закрыть дверцы</button><button id="hide-doors" type="button" aria-pressed="false">Скрыть дверцы</button><button id="snapshot" type="button">Сохранить PNG</button><button id="edit-dimensions" type="button" aria-pressed="false">Править указатели</button><button id="reset-dimensions" type="button" hidden>Сбросить указатели</button><button id="lang" type="button">AZ</button></div>
   </header>
   <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
@@ -71,13 +71,13 @@
     const fallback = document.getElementById('fallback');
     let language = new URLSearchParams(location.search).has('az') ? 'az' : 'ru';
     try {
-      // Корпусный вариант: ЛДСП 20 мм, фасады той же толщины.
-      const W = 290, totalD = 52, T = 2, D = totalD - T, H = 260;
+      // Корпусный вариант: ЛДСП 16 мм, фасады той же толщины.
+      const W = 290, totalD = 52, T = 1.6, D = totalD - T, H = 260;
       const rearT = 0.32;
       // Внутренние детали не пересекают оргалит: оставлен технологический зазор 2 мм.
       const rearClearance = 0.2, internalBoardDepth = D - rearT - rearClearance, internalBoardZ = -(D - internalBoardDepth) / 2;
-      // Скрытый цоколь: общая высота остаётся 260 см, корпус начинается на 10 см выше пола.
-      const plinthH = 10, innerBottom = plinthH + T;
+      // Скрытый цоколь: общая высота остаётся 260 см, корпус начинается на 8 см выше пола.
+      const plinthH = 8, innerBottom = plinthH + T;
       const scene = new THREE.Scene();
       // Камера не подходит ближе 250 см, поэтому близкая плоскость 10 см безопасна
       // и многократно повышает точность depth-buffer для дальних наклеек и граней.
@@ -528,16 +528,9 @@
       // На задней стороне отмечаем положение короткого внутреннего разделителя.
       // Разделитель имеет ту же глубину, что и опорная полка.
       rearSeam(new THREE.Vector3(reserveCenter, upperCatBottom, D / 2 + 0.22), new THREE.Vector3(reserveCenter, H - T, D / 2 + 0.22));
-      // L выводится ближе к фасаду, чтобы его не перекрывала откидная створка.
-      sectionLabel('L', reserveCenter, (innerBottom + catShelfY - T / 2) / 2, rearLabelZ - 1.5, reserveWidth, catShelfY - innerBottom);
-      // M/P имеют чистую высоту 143 см. Оставшиеся N/Q и O/R делят свободный остаток поровну.
-      const lowerCatClearHeight = 143;
-      const upperCatAvailable = H - T - upperCatBottom;
-      const upperCatRowHeight = (upperCatAvailable - lowerCatClearHeight - T * 2) / 2;
-      const upperSplitShelfYs = [
-        upperCatBottom + lowerCatClearHeight + T / 2,
-        upperCatBottom + lowerCatClearHeight + T + upperCatRowHeight + T / 2
-      ];
+      sectionLabel('L', reserveCenter, (innerBottom + catShelfY - T / 2) / 2, rearLabelZ, reserveWidth, catShelfY - innerBottom);
+      // Верхние O/R и средние N/Q — по 28 см; нижние M/P становятся 142 см.
+      const upperSplitShelfYs = [H - T - 28 - T / 2, H - T - 28 - T - 28 - T / 2];
       const catLeftCenter = (reserveLeft + reserveCenter - T / 2) / 2;
       const catRightCenter = (reserveCenter + T / 2 + reserveRight) / 2;
       const catMeasureHalfWidth = (reserveWidth - T) / 2;
@@ -608,8 +601,7 @@
       doorHandle(centerRightLeaf, -centerDoorWidth + 1.8);
       doorHandle(reserveOuterLeaf, reserveDoorWidth - 3);
       doorHandle(reserveInnerLeaf, -reserveDoorWidth + 3);
-      // У откидной створки ручка стоит на свободном верхнем крае, не на оси нижних петель.
-      doorHandle(lowerRightDoor, 0, lowerRightDoorHeight - 3, -1.2);
+      doorHandle(lowerRightDoor, 0, lowerRightDoorHeight / 2, -1.2);
       // Размеры размещены на внутренней стороне каждой дверцы и видны в распахнутом состоянии.
       doorMeasureLabel(shoeOuterLeaf, sideDoorWidth, shoeDoorHeight);
       doorMeasureLabel(shoeInnerLeaf, sideDoorWidth, shoeDoorHeight);
@@ -793,8 +785,8 @@
         link.download = 'maket-shkafa.png'; link.href = renderer.domElement.toDataURL('image/png'); link.click();
       });
       const translations = {
-        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', touchHint: 'Для навигации используйте два пальца', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 2900 мм × глубина 520 мм × высота 2600 мм', dimensionsNote: 'Высота 2600 мм.', depthNote: 'Корпус: 500 мм; ЛДСП: 20 мм; задняя стенка: 3,2 мм.', mount: 'Корпус необходимо закрепить к стене.', measure: 'Размеры указаны в миллиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
-        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', touchHint: 'Naviqasiya üçün iki barmaqdan istifadə edin', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 2900 mm × dərinlik 520 mm × hündürlük 2600 mm', dimensionsNote: 'Hündürlük 2600 mm-dir.', depthNote: 'Korpus: 500 mm; LDP: 20 mm; arxa divar: 3,2 mm.', mount: 'Korpusu divara bərkitmək vacibdir.', measure: 'Ölçülər millimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
+        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', touchHint: 'Для навигации используйте два пальца', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 2900 мм × глубина 520 мм × высота 2600 мм', dimensionsNote: 'Высота 2600 мм.', depthNote: 'Корпус: 504 мм; ЛДСП: 16 мм; задняя стенка: 3,2 мм.', mount: 'Корпус необходимо закрепить к стене.', measure: 'Размеры указаны в миллиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
+        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', touchHint: 'Naviqasiya üçün iki barmaqdan istifadə edin', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 2900 mm × dərinlik 520 mm × hündürlük 2600 mm', dimensionsNote: 'Hündürlük 2600 mm-dir.', depthNote: 'Korpus: 504 mm; LDP: 16 mm; arxa divar: 3,2 mm.', mount: 'Korpusu divara bərkitmək vacibdir.', measure: 'Ölçülər millimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
       };
       function applyLanguage(updateUrl = false) {
         const t = translations[language];
