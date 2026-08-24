@@ -189,11 +189,6 @@
         const handle = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 22, 18), handleMaterial);
         handle.position.set(x, y, z); handle.renderOrder = 4; leaf.add(handle);
       }
-      function horizontalDoorHandle(leaf, x = 0, y = 0, z = -1.2) {
-        const handle = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 22, 18), handleMaterial);
-        handle.rotation.z = Math.PI / 2;
-        handle.position.set(x, y, z); handle.renderOrder = 4; leaf.add(handle);
-      }
       function doorHinges(leaf, hingeX, doorHeight, count = 3, fractions = null) {
         const hingeMaterial = new THREE.MeshStandardMaterial({ color: 0x3e474d, roughness: 0.28, metalness: 0.88 });
         const positions = fractions || (count === 2 ? [-0.28, 0.28] : [-0.34, 0, 0.34]);
@@ -285,11 +280,11 @@
       let dimensionNumber = 0;
       // Расстановка размерных линий, подтверждённая в локальном макете, зафиксирована и для Pages.
       function addDimensionObject(object) { (currentDimensionGroup || dimensions).add(object); }
-      function startDimension(axis, ignoreSavedOffset = false) {
+      function startDimension(axis) {
         const group = new THREE.Group();
         group.userData = { draggableDimension: true, axis, id: `dimension-${dimensionNumber++}` };
         const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v5') || '{}')[group.userData.id];
-        group.userData.hasSavedOffset = !ignoreSavedOffset && typeof saved === 'number';
+        group.userData.hasSavedOffset = typeof saved === 'number';
         if (group.userData.hasSavedOffset) group.position[axis] = saved;
         dimensions.add(group);
         currentDimensionGroup = group;
@@ -332,8 +327,8 @@
         if (axis === 'z') mesh.rotation.x = direction > 0 ? Math.PI / 2 : -Math.PI / 2;
         mesh.position.set(x, y, z); addDimensionObject(mesh);
       }
-      function dimX(x1, x2, y, z, label, textY = y + 6, snapSpan = null, ignoreSavedOffset = false) {
-        startDimension('y', ignoreSavedOffset);
+      function dimX(x1, x2, y, z, label, textY = y + 6, snapSpan = null) {
+        startDimension('y');
         line(new THREE.Vector3(x1, y, z), new THREE.Vector3(x2, y, z));
         cone(x1 + 2.3, y, z, 'x', 1); cone(x2 - 2.3, y, z, 'x', -1);
         measureLabel(label, (x1 + x2) / 2, y, z, 9, 'bottom');
@@ -342,11 +337,11 @@
         group.userData.snapSpan = snapSpan;
         return group;
       }
-      function dimY(x, y1, y2, z, label, labelX = x + 8, labelScale = 6.6, translatedText = null, snapSpan = null, labelY = null, ignoreSavedOffset = false) {
-        startDimension('x', ignoreSavedOffset);
+      function dimY(x, y1, y2, z, label, labelX = x + 8, labelScale = 6.6, translatedText = null, snapSpan = null) {
+        startDimension('x');
         line(new THREE.Vector3(x, y1, z), new THREE.Vector3(x, y2, z));
         cone(x, y1 + 2.3, z, 'y', 1); cone(x, y2 - 2.3, z, 'y', -1);
-        measureLabel(label, x, labelY ?? (y1 + y2) / 2, z, labelScale, 'right', translatedText);
+        measureLabel(label, x, (y1 + y2) / 2, z, labelScale, 'right', translatedText);
         const group = finishDimension();
         group.userData.snapCoordinate = x;
         group.userData.snapSpan = snapSpan;
@@ -539,10 +534,10 @@
       const lowerCatClearHeight = 143;
       const upperCatAvailable = H - T - upperCatBottom;
       const upperCatRowHeight = (upperCatAvailable - lowerCatClearHeight - T * 2) / 2;
-      const lowerSplitShelfY = upperCatBottom + lowerCatClearHeight + T / 2;
-      const upperSplitShelfY = lowerSplitShelfY + T + upperCatRowHeight;
-      // Массив хранится сверху вниз: это соответствует формулам catUpperOpenings ниже.
-      const upperSplitShelfYs = [upperSplitShelfY, lowerSplitShelfY];
+      const upperSplitShelfYs = [
+        upperCatBottom + lowerCatClearHeight + T / 2,
+        upperCatBottom + lowerCatClearHeight + T + upperCatRowHeight + T / 2
+      ];
       const catLeftCenter = (reserveLeft + reserveCenter - T / 2) / 2;
       const catRightCenter = (reserveCenter + T / 2 + reserveRight) / 2;
       const catMeasureHalfWidth = (reserveWidth - T) / 2;
@@ -614,7 +609,7 @@
       doorHandle(reserveOuterLeaf, reserveDoorWidth - 3);
       doorHandle(reserveInnerLeaf, -reserveDoorWidth + 3);
       // У откидной створки ручка стоит на свободном верхнем крае, не на оси нижних петель.
-      horizontalDoorHandle(lowerRightDoor, 0, lowerRightDoorHeight - 3, -1.2);
+      doorHandle(lowerRightDoor, 0, lowerRightDoorHeight - 3, -1.2);
       // Размеры размещены на внутренней стороне каждой дверцы и видны в распахнутом состоянии.
       doorMeasureLabel(shoeOuterLeaf, sideDoorWidth, shoeDoorHeight);
       doorMeasureLabel(shoeInnerLeaf, sideDoorWidth, shoeDoorHeight);
@@ -698,14 +693,11 @@
       dimY(reserveRight - 7, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveRight - 15, 5.4, null, [reserveLeft, reserveRight]);
       [[reserveLeft, reserveCenter - T / 2], [reserveCenter + T / 2, reserveRight]].forEach(([x1, x2], index) => {
         catUpperOpenings.forEach(([bottom, top], row) => {
-          const height = top - bottom;
-          // Горизонтальная отметка занимает верхнюю треть своей ячейки.
-          const horizontalY = top - height / 6;
-          dimX(x1, x2, horizontalY, frontZ, `${catHalfWidth.toFixed(1)} см`, horizontalY + 6, [bottom, top], true);
-          // Вертикальная отметка и её подпись остаются внутри нижней трети ячейки.
+          const mid = (bottom + top) / 2;
+          dimX(x1, x2, mid, frontZ, `${catHalfWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
+          // M/O и P/R: одинаковые по высоте ячейки получают общий центр линии.
           const vectorX = index === 0 ? x1 + 6 : x2 - 6;
-          const lowerThirdLabelY = bottom + height / 6;
-          dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX + (index === 0 ? 10 : -10), 4.8, null, [x1, x2], lowerThirdLabelY, true);
+          dimY(vectorX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, vectorX + (index === 0 ? 10 : -10), 4.8, null, [x1, x2]);
         });
       });
 
