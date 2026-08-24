@@ -410,10 +410,11 @@
       surfaceMeasureLabel('surface-left', 'left', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, -W / 2 - 0.32, H / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
       surfaceMeasureLabel('surface-right', 'right', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, W / 2 + 0.32, H / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
 
-      // Три чистых проёма одинаковой ширины: левая секция, штанга и правая ниша.
+      // Во фронтальном виде: слева секция с обувницей 82 см, центр — штанга,
+      // справа — открытая секция 80 см для домика кошки.
       // Камера смотрит с фасада, поэтому экранные стороны обратны координате X.
-      const sectionWidth = (W - T * 4) / 3;
-      const entryWidth = sectionWidth, catWidth = sectionWidth, hangingWidth = sectionWidth;
+      const entryWidth = 82, catWidth = 80;
+      const hangingWidth = W - T * 2 - entryWidth - catWidth - T * 2;
       const entryCenter = W / 2 - T - entryWidth / 2;
       const entryPartition = W / 2 - T - entryWidth - T / 2;
       const hangingCenter = entryPartition - T / 2 - hangingWidth / 2;
@@ -486,7 +487,7 @@
       upperShelfYs.forEach(y => board(entryCenter, y, internalBoardZ, entryWidth, T, internalBoardDepth));
       [...shoeShelfYs, ...upperShelfYs].forEach(y => rearSeam(new THREE.Vector3(entryPartition + T / 2, y, D / 2 + 0.12), new THREE.Vector3(W / 2 - T, y, D / 2 + 0.12)));
 
-      // Правая третья секция: открытая ниша для домика кошки. Одна полка
+      // Правая третья секция: открытая ниша 80 см для домика кошки. Одна полка
       // на высоте 50 см; боковины ниши — существующие стенки секции.
       const catShelfY = innerBottom + 50 + T / 2;
       board(reserveCenter, catShelfY, internalBoardZ, reserveWidth, T, internalBoardDepth);
@@ -670,7 +671,7 @@
       // В каждом прямоугольнике A своя горизонтальная ширина.
       [...shoeGaps, ...upperShelfGaps].forEach(([bottom, top]) => {
         const mid = (bottom + top) / 2;
-        dimX(entryPartition + T / 2, W / 2 - T, mid, frontZ, `${entryWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
+        dimX(entryPartition + T / 2, W / 2 - T, mid, frontZ, '82 см', mid + 6, [bottom, top]);
       });
       // Центральная секция: отдельная высота штанги; размеры проёмов ниже.
       const rodY = upperCenterShelfY - T / 2 - 7;
@@ -691,19 +692,20 @@
       });
       // C: нижняя ниша и каждый прямоугольник M/N получают обе размерные стрелки.
       const catHalfWidth = (reserveWidth - T) / 2;
-      dimX(reserveLeft, reserveRight, (innerBottom + catShelfY - T / 2) / 2, frontZ, `${catWidth.toFixed(1)} см`, 28, [innerBottom, catShelfY - T / 2]);
+      dimX(reserveLeft, reserveRight, (innerBottom + catShelfY - T / 2) / 2, frontZ, '80 см', 28, [innerBottom, catShelfY - T / 2]);
       // L владеет всей нижней правой нишей; его линия не может уйти в левую
       // половину верхних ячеек или за внутреннюю опорную перегородку.
       dimY(reserveRight - 7, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveRight - 15, 5.4, null, [reserveLeft, reserveRight]);
       [[reserveLeft, reserveCenter - T / 2], [reserveCenter + T / 2, reserveRight]].forEach(([x1, x2], index) => {
         catUpperOpenings.forEach(([bottom, top], row) => {
           const height = top - bottom;
-          // Горизонтальная отметка стоит в нижней четверти своей ячейки.
-          const horizontalY = bottom + height * 0.25;
+          // Горизонтальная отметка занимает верхнюю треть своей ячейки.
+          const horizontalY = top - height / 6;
           dimX(x1, x2, horizontalY, frontZ, `${catHalfWidth.toFixed(1)} см`, horizontalY + 6, [bottom, top], true);
-          // Вертикальная отметка всегда идёт слева, с четвертью ширины отступа.
-          const vectorX = x1 + (x2 - x1) * 0.25;
-          dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX + 10, 4.8, null, [x1, x2], null, true);
+          // Вертикальная отметка и её подпись остаются внутри нижней трети ячейки.
+          const vectorX = index === 0 ? x1 + 6 : x2 - 6;
+          const lowerThirdLabelY = bottom + height / 6;
+          dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX + (index === 0 ? 10 : -10), 4.8, null, [x1, x2], lowerThirdLabelY, true);
         });
       });
 
