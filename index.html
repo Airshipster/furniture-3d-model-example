@@ -165,10 +165,11 @@
         leaf.position.set(hingeX, y, z);
         leaf.userData.openRotation = direction * Math.PI / 2;
         leaf.userData.direction = direction;
+        leaf.userData.closedX = hingeX;
         leaf.userData.closedZ = z;
-        // When opened, neighbouring leaves on opposite sides of a partition
-        // are separated by one facade thickness instead of occupying one plane.
-        leaf.userData.openDepthOffset = direction * T / 2;
+        // Open leaves mounted on opposite sides of a partition are separated
+        // across that partition by the 20 mm facade thickness.
+        leaf.userData.openSideOffset = direction * T / 2;
         doorsGroup.add(leaf); doorLeaves.push(leaf);
         const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, T), material);
         mesh.position.set(direction * w / 2, 0, 0); mesh.renderOrder = 2; leaf.add(mesh);
@@ -245,7 +246,7 @@
         context.font = '600 31px system-ui'; context.fillText(`${Math.round(width * 10)} × ${Math.round(height * 10)} ${language === 'az' ? 'mm' : 'мм'}`, 200, 94);
         record.texture.needsUpdate = true;
       }
-      function doorMeasureLabel(leaf, width, height, mirror = false) {
+      function doorMeasureLabel(leaf, width, height, mirror = false, flipInnerLabel = false) {
         const canvas = document.createElement('canvas');
         canvas.width = 400; canvas.height = 136;
         const texture = new THREE.CanvasTexture(canvas);
@@ -254,16 +255,16 @@
         const bottomHinged = leaf.userData.openAxis === 'x';
         const labelX = bottomHinged ? 0 : leaf.userData.direction * width / 2;
         const labelY = bottomHinged ? height / 2 : 0;
-        const addLabel = (z, rotationY) => {
+        const addLabel = (z, rotationY, rotationZ = 0) => {
           const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 8.16), new THREE.MeshBasicMaterial({ map: texture, transparent: false, side: THREE.FrontSide, depthTest: true, depthWrite: true, alphaTest: 0.01 }));
           labelMesh.position.set(labelX, labelY, z);
-          labelMesh.rotation.y = rotationY;
+          labelMesh.rotation.set(0, rotationY, rotationZ);
           labelMesh.renderOrder = 6;
           leaf.add(labelMesh);
         };
         // The same opaque sticker is on both faces: it remains legible after opening.
         addLabel(-T / 2 - 0.9, Math.PI);
-        addLabel(T / 2 + 0.9, 0);
+        addLabel(T / 2 + 0.9, 0, flipInnerLabel ? Math.PI : 0);
       }
       function plinthMeasureLabel(width, height, z, x = 0, part = '') {
         const canvas = document.createElement('canvas');
@@ -646,7 +647,7 @@
       mirrorHighlight(centerRightLeaf, centerDoorWidth, internalHeight);
       doorMeasureLabel(reserveOuterLeaf, reserveDoorWidth, rightDoorHeight);
       doorMeasureLabel(reserveInnerLeaf, reserveDoorWidth, rightDoorHeight);
-      doorMeasureLabel(lowerRightDoor, rightDoorWidth, lowerRightDoorHeight);
+      doorMeasureLabel(lowerRightDoor, rightDoorWidth, lowerRightDoorHeight, false, true);
       // Петли вертикальных створок видны только с внутренней стороны.
       doorHinges(shoeOuterLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
       doorHinges(shoeInnerLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
@@ -680,7 +681,7 @@
       // Левая обувница: три реальные чистые высоты между соседними полками.
       const shoeGaps = [[innerBottom, shoeShelfYs[0] - T / 2], ...shoeShelfYs.slice(1).map((y, index) => [shoeShelfYs[index] + T / 2, y - T / 2])];
       const entryVisualLeft = W / 2 - T;
-      const entryMarkerX = entryVisualLeft - 25;
+      const entryMarkerX = entryVisualLeft - entryWidth * 0.25;
       shoeGaps.forEach(([bottom, top]) => {
         dimY(entryMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, entryMarkerX - 8, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
       });
@@ -711,7 +712,7 @@
       centerOpenings.forEach(([bottom, top], index) => {
         const mid = (bottom + top) / 2;
         dimX(centerLeft, centerRight, mid, frontZ, `${hangingWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
-        const centerMarkerX = centerRight - 25;
+        const centerMarkerX = centerRight - hangingWidth * 0.25;
         dimY(centerMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, centerMarkerX - 8, 5.0);
       });
       // C: нижняя ниша и каждый прямоугольник M/N получают обе размерные стрелки.
@@ -719,7 +720,7 @@
       dimX(reserveLeft, reserveRight, (innerBottom + catShelfY - T / 2) / 2, frontZ, `${catWidth.toFixed(1)} см`, 28, [innerBottom, catShelfY - T / 2]);
       // L владеет всей нижней правой нишей; его линия не может уйти в левую
       // половину верхних ячеек или за внутреннюю опорную перегородку.
-      const reserveMarkerX = reserveRight - 25;
+      const reserveMarkerX = reserveRight - reserveWidth * 0.25;
       dimY(reserveMarkerX, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveMarkerX - 8, 5.4, null, [reserveLeft, reserveRight]);
       [[reserveLeft, reserveCenter - T / 2], [reserveCenter + T / 2, reserveRight]].forEach(([x1, x2], index) => {
         catUpperOpenings.forEach(([bottom, top], row) => {
@@ -727,8 +728,8 @@
           // Горизонтальная отметка стоит в нижней четверти своей ячейки.
           const horizontalY = bottom + height * 0.25;
           dimX(x1, x2, horizontalY, frontZ, `${catHalfWidth.toFixed(1)} см`, horizontalY + 6, [bottom, top], true);
-          // Every vertical marker is 250 mm from its screen-left edge.
-          const vectorX = x2 - 25;
+          // Every vertical marker is one quarter of its own opening from screen-left.
+          const vectorX = x2 - (x2 - x1) * 0.25;
           dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX - 8, 4.8, null, [x1, x2], null, true);
         });
       });
@@ -798,11 +799,12 @@
       function setDoorState() {
         doorLeaves.forEach(leaf => {
           leaf.rotation.set(0, 0, 0);
+          if (leaf.userData.closedX !== undefined) leaf.position.x = leaf.userData.closedX;
           leaf.position.z = leaf.userData.closedZ;
           if (leaf.userData.outline) leaf.userData.outline.visible = doorsOpen;
           if (doorsOpen) {
             leaf.rotation[leaf.userData.openAxis || 'y'] = leaf.userData.openRotation;
-            leaf.position.z += leaf.userData.openDepthOffset || 0;
+            leaf.position.x += leaf.userData.openSideOffset || 0;
           }
         });
       }
