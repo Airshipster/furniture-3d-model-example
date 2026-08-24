@@ -681,9 +681,7 @@
       const rodText = (lang = language) => `${(rodY - lowerShelfTop).toFixed(1)} ${lang === 'az' ? 'sm — asqı borusu' : 'см — штанга'}`;
       // Указатель штанги ходит вдоль неё и цепляется за её доли, а верхняя стрелка
       // останавливается под трубой, не проходя сквозь неё.
-      // Keep the rod annotation 15% of the section width from the full-height marker.
-      const rodDimensionX = centerLeft + 5 + hangingWidth * 0.15;
-      const rodDimension = dimY(rodDimensionX, lowerShelfTop, rodY - 1.8, rodZ, rodText(), centerLeft + 30, 5.2, rodText, [centerLeft, centerRight]);
+      const rodDimension = dimY(centerLeft + 18, lowerShelfTop, rodY - 1.8, rodZ, rodText(), centerLeft + 30, 5.2, rodText, [centerLeft, centerRight]);
       // В каждом прямоугольнике B — своя ширина и своя высота.
       const centerOpenings = [[innerBottom, lowerCenterShelfY - T / 2], [lowerCenterShelfY + T / 2, upperCenterShelfY - T / 2], [upperCenterShelfY + T / 2, H - T]];
       centerOpenings.forEach(([bottom, top], index) => {
@@ -703,8 +701,8 @@
           // Горизонтальная отметка стоит в нижней четверти своей ячейки.
           const horizontalY = bottom + height * 0.25;
           dimX(x1, x2, horizontalY, frontZ, `${catHalfWidth.toFixed(1)} см`, horizontalY + 6, [bottom, top], true);
-          // In the front view, screen-left maps to the larger X coordinate.
-          const vectorX = x2 - (x2 - x1) * 0.25;
+          // Вертикальная отметка всегда идёт слева, с четвертью ширины отступа.
+          const vectorX = x1 + (x2 - x1) * 0.25;
           dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX + 10, 4.8, null, [x1, x2], null, true);
         });
       });
