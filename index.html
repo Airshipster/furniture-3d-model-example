@@ -237,24 +237,20 @@
       function drawDoorLabel(record) {
         const { canvas, width, height } = record;
         const context = canvas.getContext('2d');
-        const renderScale = canvas.width / 400;
-        context.setTransform(renderScale, 0, 0, renderScale, 0, 0);
-        context.clearRect(0, 0, 400, 136);
+        context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = 'rgba(35, 42, 47, 0.93)'; context.fillRect(5, 5, 390, 126);
         context.strokeStyle = '#f1c36a'; context.lineWidth = 3; context.strokeRect(7, 7, 386, 122);
         context.fillStyle = '#eff5f7'; context.font = '600 34px system-ui'; context.textAlign = 'center'; context.textBaseline = 'middle';
         const title = record.plinth ? `${language === 'az' ? 'Sokl' : 'Цоколь'}${record.part ? ` ${record.part}` : ''}:` : (record.title || (record.mirror ? (language === 'az' ? 'Güzgülü qapı:' : 'Зеркальная дверь:') : (language === 'az' ? 'Qapı:' : 'Дверь:')));
         context.fillText(title, 200, 42);
         context.font = '600 31px system-ui'; context.fillText(`${Math.round(width * 10)} × ${Math.round(height * 10)} ${language === 'az' ? 'mm' : 'мм'}`, 200, 94);
-        context.setTransform(1, 0, 0, 1, 0, 0);
         record.texture.needsUpdate = true;
       }
       function doorMeasureLabel(leaf, width, height, mirror = false, flipInnerLabel = false) {
         const canvas = document.createElement('canvas');
-        canvas.width = 800; canvas.height = 272;
+        canvas.width = 400; canvas.height = 136;
         const texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
-        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
         const record = { canvas, texture, width, height, mirror }; drawDoorLabel(record); doorLabelRecords.push(record);
         const bottomHinged = leaf.userData.openAxis === 'x';
         const labelX = bottomHinged ? 0 : leaf.userData.direction * width / 2;
@@ -591,7 +587,7 @@
       // В C полупрозрачная дверца закрывает только пространство над кошачьей нишей.
       const doorZ = -D / 2 - T / 2;
       // Tall facades cover the upper 20 mm panel as well as the inner opening.
-      const facadeTop = H;
+      const facadeTop = H + 0.7;
       const internalHeight = facadeTop - plinthH;
       // Нижние фасады перекрывают лицевой торец днища и начинаются от цоколя.
       const shoeDoorBottom = plinthH;
