@@ -297,11 +297,31 @@
       let currentDimensionGroup = null;
       let dimensionNumber = 0;
       // Расстановка размерных линий, подтверждённая в локальном макете, зафиксирована и для Pages.
+      // Local edits can still override these defaults in the browser.
+      const publishedDimensionOffsets = Object.freeze({
+        'dimension-1': 10.026316696745425,
+        'dimension-3': 10.026316696745425,
+        'dimension-5': 10.026316696745425,
+        'dimension-7': 10.026316696745425,
+        'dimension-9': 10.026316696745425,
+        'dimension-11': 10.026316696745425,
+        'dimension-17': 10.828619714795309,
+        'dimension-20': 11.375,
+        'dimension-26': 10.026316696745425,
+        'dimension-27': 0,
+        'dimension-28': 10.026316696745425,
+        'dimension-30': 10.828619714795309
+      });
+      function localDimensionOffsets() {
+        try { return JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v2-separate-sections') || '{}'); }
+        catch { return {}; }
+      }
       function addDimensionObject(object) { (currentDimensionGroup || dimensions).add(object); }
       function startDimension(axis, ignoreSavedOffset = false) {
         const group = new THREE.Group();
         group.userData = { draggableDimension: true, axis, id: `dimension-${dimensionNumber++}` };
-        const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v2-separate-sections') || '{}')[group.userData.id];
+        const local = localDimensionOffsets();
+        const saved = Object.prototype.hasOwnProperty.call(local, group.userData.id) ? local[group.userData.id] : publishedDimensionOffsets[group.userData.id];
         group.userData.hasSavedOffset = !ignoreSavedOffset && typeof saved === 'number';
         if (group.userData.hasSavedOffset) group.position[axis] = saved;
         dimensions.add(group);
@@ -497,11 +517,6 @@
         });
         shoeShelfYs.forEach(y => rearSeam(lowerRight.innerLeft, y, lowerRight.innerRight, y));
         const openTopBottom = shoeShelfYs[3] + T / 2;
-        const openShelfY = openTopBottom + (lowerTopBottom - openTopBottom) / 2;
-        const openRightSpaces = [[openShelfY + T / 2, lowerTopBottom], [openTopBottom, openShelfY - T / 2]];
-        sectionLabel('C', (lowerRight.innerLeft + lowerRight.innerRight) / 2, (openShelfY + T / 2 + lowerTopBottom) / 2, rearLabelZ, lowerRight.width, lowerTopBottom - openShelfY - T / 2);
-        sectionLabel('D', (lowerRight.innerLeft + lowerRight.innerRight) / 2, (openTopBottom + openShelfY - T / 2) / 2, rearLabelZ, lowerRight.width, openShelfY - T / 2 - openTopBottom);
-        rearSeam(lowerRight.innerLeft, openShelfY, lowerRight.innerRight, openShelfY);
 
         // J идёт от цоколя до антресоли без промежуточной полки; штанга стоит в этом же проёме.
         sectionLabel('J', 0, (innerBottom + lowerTopBottom) / 2, rearLabelZ, centerClearWidth, lowerClearHeight);
@@ -589,7 +604,9 @@
           dimY(verticalX, bottom, top, frontZ, label || `${height.toFixed(1)} см`, verticalX + 8, 5.0, null, [x1, x2]);
         }
         shoeOpenings.forEach(([bottom, top]) => markOpening(lowerRight.innerLeft, lowerRight.innerRight, bottom, top));
-        openRightSpaces.forEach(([bottom, top]) => markOpening(lowerRight.innerLeft, lowerRight.innerRight, bottom, top));
+        // C and D already have their own dimensions above. Keep later IDs stable
+        // so the confirmed manual offsets still refer to the same markers.
+        dimensionNumber += 4;
         markOpening(lowerCenter.innerLeft, lowerCenter.innerRight, innerBottom, lowerTopBottom);
         const rodDimensionX = lowerCenter.innerRight - centerClearWidth * 0.35;
         dimY(rodDimensionX, innerBottom, rodY - 1.8, 0, `${(rodY - innerBottom).toFixed(1)} см — штанга`, rodDimensionX + 8, 5.1, null, [lowerCenter.innerLeft, lowerCenter.innerRight]);
