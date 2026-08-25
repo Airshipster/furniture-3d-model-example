@@ -729,9 +729,10 @@ function versionUrl(version, locale = language) {
       dimX(reserveLeft, reserveRight, (innerBottom + catShelfY - T / 2) / 2, frontZ, `${catWidth.toFixed(1)} см`, 28, [innerBottom, catShelfY - T / 2]);
       // L владеет всей нижней правой нишей; его линия не может уйти в левую
       // половину верхних ячеек или за внутреннюю опорную перегородку.
-      // L lies below P, so both height markers use the same visual column.
-      const reserveMarkerX = reserveRight - catHalfWidth * 0.25;
-      dimY(reserveMarkerX, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveMarkerX + 8, 5.4, null, [reserveLeft, reserveRight]);
+      // L is directly below P. It uses P's exact X coordinate and never loads
+      // an old manually saved displacement.
+      const pMarkerX = reserveRight - (reserveRight - (reserveCenter + T / 2)) * 0.25;
+      dimY(pMarkerX, innerBottom, catShelfY - T / 2, frontZ, '50 см', pMarkerX + 8, 5.4, null, [reserveLeft, reserveRight], null, true);
       [[reserveLeft, reserveCenter - T / 2], [reserveCenter + T / 2, reserveRight]].forEach(([x1, x2], index) => {
         catUpperOpenings.forEach(([bottom, top], row) => {
           const height = top - bottom;
