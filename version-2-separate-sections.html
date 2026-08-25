@@ -44,7 +44,14 @@
     .github-link { position: fixed; z-index: 3; right: 20px; bottom: 20px; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #879199; border-radius: 10px; color: #eef1f3; background: rgb(24 30 34 / 88%); pointer-events: auto; }
     .github-link:hover, .github-link:focus-visible { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
     .github-link svg { width: 23px; height: 23px; fill: currentColor; }
-    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { position: relative; left: auto; bottom: auto; width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .touch-hint { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 109px; display: block; overflow: hidden; color: #d5e0e4; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.2; text-align: center; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; } .github-link { top: 12px; right: 12px; bottom: auto; width: 36px; height: 36px; } .github-link svg { width: 20px; height: 20px; } .legend { display: none; } }
+    .version-switcher { position: fixed; z-index: 4; right: 20px; bottom: 20px; width: 44px; pointer-events: auto; }
+    .version-switcher summary { display: grid; place-items: center; width: 44px; height: 32px; border: 1px solid #879199; border-radius: 8px; color: #eef1f3; background: rgb(24 30 34 / 88%); font-size: 12px; font-weight: 650; cursor: pointer; list-style: none; }
+    .version-switcher summary::-webkit-details-marker { display: none; }
+    .version-switcher summary:hover, .version-switcher summary:focus-visible { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
+    .version-switcher-menu { display: grid; gap: 3px; margin: 5px 0 0; padding: 4px; border: 1px solid #879199; border-radius: 8px; background: rgb(24 30 34 / 96%); }
+    .version-switcher-menu button { min-width: 34px; padding: 4px; border-radius: 5px; font-size: 11px; }
+    @media (min-width: 621px) { .github-link { bottom: 62px; } }
+    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { position: relative; left: auto; bottom: auto; width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .touch-hint { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 109px; display: block; overflow: hidden; color: #d5e0e4; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.2; text-align: center; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; } .github-link { top: 12px; right: 12px; bottom: auto; width: 36px; height: 36px; } .github-link svg { width: 20px; height: 20px; } .version-switcher { display: none; } .legend { display: none; } }
   </style>
 </head>
 <body>
@@ -55,12 +62,13 @@
   <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
   <div class="touch-hint" id="touch-hint">Для навигации используйте два пальца</div>
   <a class="github-link" href="https://github.com/Airshipster/furniture-3d-model-example" target="_blank" rel="noopener noreferrer" aria-label="Открыть репозиторий GitHub" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.44-2.53-.49-2.69-.94-.09-.23-.48-.94-.81-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.73c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <details class="version-switcher" id="version-switcher"><summary aria-label="Выбрать версию модели" title="Версия модели">V2</summary><div class="version-switcher-menu"><button type="button" data-version="0">V0</button><button type="button" data-version="1">V1</button><button type="button" data-version="2">V2</button></div></details>
   <div class="loading" id="loading" role="status">Загрузка…</div>
   <div class="fallback" id="fallback">Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.</div>
   <script type="importmap">
     { "imports": {
-      "three": "./node_modules/three/build/three.module.js",
-      "three/addons/": "./node_modules/three/examples/jsm/"
+      "three": "https://unpkg.com/three@0.179.1/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.179.1/examples/jsm/"
     } }
   </script>
   <script type="module">
@@ -69,7 +77,10 @@
 
     const stage = document.getElementById('stage');
     const fallback = document.getElementById('fallback');
+    const modelVersion = '2';
     let language = new URLSearchParams(location.search).has('az') ? 'az' : 'ru';
+    function versionUrl(version, locale = language) { return `${new URL('index.html', location.href).pathname}?v=${version}&${locale}`; }
+    document.querySelectorAll('[data-version]').forEach(button => button.addEventListener('click', () => { location.href = versionUrl(button.dataset.version); }));
     try {
       // Корпусный вариант: ЛДСП 20 мм, фасады той же толщины.
       const W = 290, totalD = 52, T = 2, D = totalD - T, H = 260;
@@ -620,8 +631,7 @@
         markOpening(mezzLeftCenter + T / 2, mezzLeftX2, mezzBottom, mezzTop, '50 см — R');
       }
 
-      const modelVersion = 'v2';
-      if (modelVersion === 'v2') {
+      if (modelVersion === '2') {
         document.getElementById('title').textContent = 'Шкаф для ниши — версия 2';
         document.getElementById('subtitle').textContent = 'Три самостоятельных нижних и три верхних корпуса с общей крышкой.';
         buildVersion2();
@@ -1085,9 +1095,7 @@
         rearLabelRecords.forEach(drawRearLabel);
         translatedMeasureRecords.forEach(record => { record.draw(); record.texture.needsUpdate = true; });
         if (updateUrl) {
-          const url = new URL(location.href);
-          url.search = language === 'az' ? '?az' : '';
-          history.replaceState(null, '', url);
+          history.replaceState(null, '', versionUrl(modelVersion, language));
         }
       }
       document.getElementById('lang').addEventListener('click', () => {
