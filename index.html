@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    // V0 stays on this page. V1/V2 preserve the existing ?az language switch.
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const target = { '0': 'index.html', '1': 'version-1.html', '2': 'version-2-separate-sections.html' }[params.get('v')];
+      if (!target) return;
+      const url = new URL(target, location.href);
+      if (params.has('az')) url.search = '?az';
+      location.replace(url);
+    })();
+  </script>
+  <title>Макет шкафа</title>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Шкаф для ниши — 3D-модель">
+  <meta property="og:description" content="Интерактивная 3D-модель мебели с размерами для демонстрации мастерам.">
+  <meta property="og:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
+  <meta property="og:image:secure_url" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="2320">
+  <meta property="og:image:height" content="1463">
+  <meta property="og:site_name" content="Furniture 3D Model Example">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://airshipster.github.io/furniture-3d-model-example/screenshots/model-view-1.png">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #161a1d; color: #eef1f3; font: 16px/1.4 system-ui, sans-serif; }
+    #stage { width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 34%, #667077, #161a1d 72%); }
+    canvas { display: block; width: 100%; height: 100%; }
+    header { position: fixed; z-index: 2; top: 20px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; pointer-events: none; }
+    h1 { margin: 0; font-size: clamp(21px, 3vw, 30px); font-weight: 600; }
+    p { margin: 4px 0 0; color: #cfd5d9; }
+    .info-panel { position: fixed; z-index: 2; left: 20px; bottom: 20px; width: min(360px, calc(100vw - 40px)); padding: 10px 34px 10px 12px; border-radius: 10px; background: rgb(24 30 34 / 88%); pointer-events: auto; }
+    .info-panel[hidden] { display: none; }
+    .info-panel h2 { margin: 0 0 5px; font-size: 15px; font-weight: 650; }
+    .info-panel strong, .info-panel span { display: block; }
+    .info-panel span { color: #cfd5d9; font-size: 14px; }
+    .info-close { position: absolute; top: 7px; right: 7px; width: 27px; height: 27px; padding: 0; border: 0; background: transparent; font-size: 22px; line-height: 1; }
+    .info-toggle { margin-top: 7px; padding: 5px 8px; font-size: 13px; pointer-events: auto; }
+    .controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; pointer-events: auto; }
+    button { border: 1px solid #879199; border-radius: 8px; padding: 9px 12px; color: #eef1f3; background: #293137; font: inherit; cursor: pointer; }
+    button:hover, button:focus-visible, button[aria-pressed="true"] { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
+    button:disabled { opacity: .42; cursor: not-allowed; }
+    .legend { position: fixed; z-index: 2; right: 20px; bottom: 20px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; max-width: 390px; pointer-events: none; }
+    .legend span { padding: 6px 9px; border-radius: 7px; background: rgb(20 18 15 / 87%); color: #eee5da; font-size: 14px; }
+    .fallback { position: fixed; inset: 0; display: none; place-items: center; padding: 30px; text-align: center; color: #f4eee6; background: #171411; }
+    .loading { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; color: #eef5f7; background: #161a1d; font: 600 18px/1.4 system-ui, sans-serif; transition: opacity .18s ease; }
+    .loading[hidden] { display: none; }
+    .touch-hint { display: none; }
+    .github-link { position: fixed; z-index: 3; right: 20px; bottom: 20px; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #879199; border-radius: 10px; color: #eef1f3; background: rgb(24 30 34 / 88%); pointer-events: auto; }
+    .github-link:hover, .github-link:focus-visible { background: #53616a; outline: 2px solid #c8d2d8; outline-offset: 2px; }
+    .github-link svg { width: 23px; height: 23px; fill: currentColor; }
+    @media (max-width: 620px) { header { top: 12px; left: 12px; right: 12px; flex-direction: column; } .info-panel { position: relative; left: auto; bottom: auto; width: min(330px, calc(100vw - 24px)); } .controls { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px; border-radius: 10px; background: rgb(24 30 34 / 92%); } .controls button { min-width: 0; padding: 8px 4px; font-size: 13px; } #front { order: 1; } #iso { order: 2; } #snapshot { order: 3; } #doors { order: 4; } #hide-doors { order: 5; } #lang { order: 6; } .touch-hint { position: fixed; z-index: 3; left: 12px; right: 12px; bottom: 109px; display: block; overflow: hidden; color: #d5e0e4; font-size: clamp(10px, 3.1vw, 13px); line-height: 1.2; text-align: center; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; } .github-link { top: 12px; right: 12px; bottom: auto; width: 36px; height: 36px; } .github-link svg { width: 20px; height: 20px; } .legend { display: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1 id="title">Шкаф для ниши</h1><button id="info-toggle" class="info-toggle" type="button">Информация</button><section id="info-panel" class="info-panel"><button id="info-close" class="info-close" type="button" aria-label="Закрыть информацию">×</button><h2 id="info-heading">Информация</h2><p id="subtitle">Каждый внутренний прямоугольный проём отмечен своей буквой.</p><p id="measure-note">Размеры указаны в миллиметрах</p><strong id="dimensions-title">2900 × 520 × 2600 мм</strong><span id="dimensions-note">Высота 2600 мм.</span><span id="depth-note">Корпус 500 мм, ЛДСП 20 мм, задняя стенка 3,2 мм.</span><span id="mount-note">Корпус необходимо закрепить к стене.</span></section></div>
+    <div class="controls" aria-label="Вид макета"><button id="front" type="button">Вид спереди</button><button id="iso" type="button" aria-pressed="true">Изометрия</button><button id="doors" type="button" aria-pressed="false">Закрыть дверцы</button><button id="hide-doors" type="button" aria-pressed="false">Скрыть дверцы</button><button id="snapshot" type="button">Сохранить PNG</button><button id="edit-dimensions" type="button" aria-pressed="false">Править указатели</button><button id="reset-dimensions" type="button" hidden>Сбросить указатели</button><button id="lang" type="button">AZ</button></div>
+  </header>
+  <div id="stage" aria-label="Интерактивный 3D-макет шкафа"></div>
+  <div class="touch-hint" id="touch-hint">Для навигации используйте два пальца</div>
+  <a class="github-link" href="https://github.com/Airshipster/furniture-3d-model-example" target="_blank" rel="noopener noreferrer" aria-label="Открыть репозиторий GitHub" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.01.44-2.53-.49-2.69-.94-.09-.23-.48-.94-.81-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.73c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48l-.01 2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg></a>
+  <div class="loading" id="loading" role="status">Загрузка…</div>
+  <div class="fallback" id="fallback">Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.</div>
+  <script type="importmap">
+    { "imports": {
+      "three": "./node_modules/three/build/three.module.js",
+      "three/addons/": "./node_modules/three/examples/jsm/"
+    } }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const stage = document.getElementById('stage');
+    const fallback = document.getElementById('fallback');
+    let language = new URLSearchParams(location.search).has('az') ? 'az' : 'ru';
+    try {
+      // Корпусный вариант: ЛДСП 20 мм, фасады той же толщины.
+      const W = 290, totalD = 52, T = 2, D = totalD - T, H = 260;
+      const rearT = 0.32;
+      // Внутренние детали не пересекают оргалит: оставлен технологический зазор 2 мм.
+      const rearClearance = 0.2, internalBoardDepth = D - rearT - rearClearance, internalBoardZ = -(D - internalBoardDepth) / 2;
+      // Скрытый цоколь: общая высота остаётся 260 см, корпус начинается на 10 см выше пола.
+      const plinthH = 10, innerBottom = plinthH + T;
+      const scene = new THREE.Scene();
+      // Камера не подходит ближе 250 см, поэтому близкая плоскость 10 см безопасна
+      // и многократно повышает точность depth-buffer для дальних наклеек и граней.
+      const camera = new THREE.PerspectiveCamera(35, 1, 10, 1300);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+      // Телефоны получают более чёткий, но всё ещё ограниченный по нагрузке рендер.
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      stage.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.target.set(0, H * 0.48, 0);
+      controls.minDistance = 250;
+      controls.maxDistance = 900;
+      controls.maxPolarAngle = Math.PI - 0.05;
+      controls.minPolarAngle = 0.05;
+
+      const cabinet = new THREE.Group();
+      scene.add(cabinet);
+      const doorsGroup = new THREE.Group();
+      cabinet.add(doorsGroup);
+      const dimensions = new THREE.Group();
+      scene.add(dimensions);
+      const doorDimensions = new THREE.Group();
+      dimensions.add(doorDimensions);
+      const panel = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.52, metalness: 0.04 });
+      const rear = new THREE.MeshStandardMaterial({ color: 0xb8c0c5, roughness: 0.72 }); // оргалит 3,2 мм
+      const edge = new THREE.LineBasicMaterial({ color: 0x4d555d, transparent: true, opacity: 0.78 });
+      function board(x, y, z, w, h, d, material = panel) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+        mesh.position.set(x, y, z);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        cabinet.add(mesh);
+        const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), edge);
+        outline.position.copy(mesh.position);
+        cabinet.add(outline);
+      }
+      const rearLabelRecords = [];
+      function mmText(text, lang = language) {
+        const unit = lang === 'az' ? 'mm' : 'мм';
+        return text.replace(/(\d+(?:[.,]\d+)?)\s*(см|sm)/g, (_, value) => `${Math.round(Number(value.replace(',', '.')) * 10)} ${unit}`);
+      }
+      function drawRearLabel(record) {
+        const { canvas, letter, width, height } = record;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = 'rgba(35, 42, 47, 0.93)'; context.fillRect(5, 5, 246, 150);
+        context.strokeStyle = '#f1c36a'; context.lineWidth = 3; context.strokeRect(7, 7, 242, 146);
+        context.fillStyle = '#eff5f7'; context.font = '700 66px system-ui'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(letter, 128, 54);
+        context.font = '600 25px system-ui'; context.fillText(`${Math.round(width * 10)} × ${Math.round(height * 10)} ${language === 'az' ? 'mm' : 'мм'}`, 128, 116);
+        record.texture.needsUpdate = true;
+      }
+      function sectionLabel(letter, x, y, z, width, height) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128; canvas.height = 128;
+        const context = canvas.getContext('2d');
+        context.fillStyle = 'rgba(35, 42, 47, 0.93)'; context.fillRect(8, 8, 112, 112);
+        context.strokeStyle = '#f1c36a'; context.lineWidth = 5; context.strokeRect(10, 10, 108, 108);
+        context.fillStyle = '#eff5f7'; context.font = '700 82px system-ui';
+        context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(letter, 64, 68);
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
+        // Наклейки подчиняются глубине сцены: полки и перегородки физически их закрывают.
+        const inner = new THREE.Mesh(new THREE.PlaneGeometry(24, 24), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthTest: true, depthWrite: false }));
+        inner.position.set(x, y, z); inner.rotation.y = Math.PI; cabinet.add(inner);
+        const rearCanvas = document.createElement('canvas'); rearCanvas.width = 256; rearCanvas.height = 160;
+        const rearTexture = new THREE.CanvasTexture(rearCanvas);
+        rearTexture.minFilter = THREE.LinearMipmapLinearFilter; rearTexture.magFilter = THREE.LinearFilter; rearTexture.generateMipmaps = true;
+        const rearRecord = { canvas: rearCanvas, texture: rearTexture, letter, width, height }; drawRearLabel(rearRecord); rearLabelRecords.push(rearRecord);
+        const rearCard = new THREE.Mesh(new THREE.PlaneGeometry(28, 17.5), new THREE.MeshBasicMaterial({ map: rearTexture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: false }));
+        rearCard.position.set(x, y, D / 2 + 0.34); cabinet.add(rearCard);
+      }
+      // Непрозрачные светло-серые фасады: так наклейки и содержимое не просвечивают с обратной стороны.
+      const doorMaterial = new THREE.MeshStandardMaterial({ color: 0xf0f2f3, roughness: 0.28, metalness: 0.12, depthWrite: true, side: THREE.DoubleSide });
+      const centerDoorMaterial = new THREE.MeshStandardMaterial({ color: 0xeaf1f4, roughness: 0.08, metalness: 0.84, depthWrite: true, side: THREE.DoubleSide });
+      // У центральных створок зеркало наклеено только на внешнюю (локальную -Z) сторону.
+      // Пять остальных граней, включая внутреннюю, остаются обычной светлой плитой.
+      const centerDoorMaterials = [doorMaterial, doorMaterial, doorMaterial, doorMaterial, doorMaterial, centerDoorMaterial];
+      const doorEdge = new THREE.LineBasicMaterial({ color: 0xebf0f2, transparent: true, opacity: 0.9 });
+      const doorLeaves = [];
+      function doorPanel(hingeX, y, z, w, h, direction, material = doorMaterial) {
+        const leaf = new THREE.Group();
+        leaf.position.set(hingeX, y, z);
+        leaf.userData.openRotation = direction * Math.PI / 2;
+        leaf.userData.direction = direction;
+        leaf.userData.closedX = hingeX;
+        leaf.userData.closedZ = z;
+        // Opposite leaves on one partition open on two distinct 20 mm planes.
+        leaf.userData.openSideOffset = direction * T / 2;
+        doorsGroup.add(leaf); doorLeaves.push(leaf);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, T), material);
+        mesh.position.set(direction * w / 2, 0, 0); mesh.renderOrder = 2; leaf.add(mesh);
+        const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), doorEdge);
+        outline.position.copy(mesh.position); outline.renderOrder = 3; outline.visible = false; leaf.add(outline);
+        leaf.userData.outline = outline;
+        return leaf;
+      }
+      function bottomHingedDoor(x, bottom, z, w, h, material = doorMaterial) {
+        const leaf = new THREE.Group();
+        leaf.position.set(x, bottom, z);
+        leaf.userData.openAxis = 'x';
+        leaf.userData.openRotation = -Math.PI / 2;
+        leaf.userData.closedZ = z;
+        doorsGroup.add(leaf); doorLeaves.push(leaf);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, T), material);
+        mesh.position.set(0, h / 2, 0); mesh.renderOrder = 2; leaf.add(mesh);
+        const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), doorEdge);
+        outline.position.copy(mesh.position); outline.renderOrder = 3; outline.visible = false; leaf.add(outline);
+        return leaf;
+      }
+      const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x535b63, roughness: 0.32, metalness: 0.85 });
+      function doorHandle(leaf, x, y = 0, z = -1.2) {
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 22, 18), handleMaterial);
+        handle.position.set(x, y, z); handle.renderOrder = 4; leaf.add(handle);
+      }
+      function horizontalDoorHandle(leaf, x = 0, y = 0, z = -1.2) {
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 22, 18), handleMaterial);
+        handle.rotation.z = Math.PI / 2;
+        handle.position.set(x, y, z); handle.renderOrder = 4; leaf.add(handle);
+      }
+      function doorHinges(leaf, hingeX, doorHeight, count = 3, fractions = null) {
+        const hingeMaterial = new THREE.MeshStandardMaterial({ color: 0x3e474d, roughness: 0.28, metalness: 0.88 });
+        const positions = fractions || (count === 2 ? [-0.28, 0.28] : [-0.34, 0, 0.34]);
+        positions.forEach(fraction => {
+          const y = doorHeight * fraction;
+          // Чашка — в фасаде, на его внутренней поверхности; снаружи её нет.
+          const cup = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.38, 16), hingeMaterial);
+          cup.rotation.x = Math.PI / 2;
+          cup.position.set(leaf.userData.direction * 2.4, y, T / 2 + 0.08);
+          cup.castShadow = true; leaf.add(cup);
+          // Рычаг соединяет чашку с ответной частью на боковине.
+          const arm = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.65, 0.5), hingeMaterial);
+          arm.position.set(leaf.userData.direction * 0.6, y, T / 2 + 0.32);
+          arm.castShadow = true; leaf.add(arm);
+          // Ответная планка закреплена на внутренней плоскости вертикальной стенки.
+          const plate = new THREE.Mesh(new THREE.BoxGeometry(0.45, 4.8, 3.2), hingeMaterial);
+          plate.position.set(leaf.position.x + leaf.userData.direction * T / 2, leaf.position.y + y, -D / 2 + T / 2 + 0.1);
+          plate.castShadow = true; cabinet.add(plate);
+        });
+      }
+      function bottomDoorHinges(leaf, width) {
+        const hingeMaterial = new THREE.MeshStandardMaterial({ color: 0x3e474d, roughness: 0.28, metalness: 0.88 });
+        [-0.34, 0.34].forEach(fraction => {
+          const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 6, 16), hingeMaterial);
+          pin.rotation.z = Math.PI / 2;
+          pin.position.set(width * fraction, 0, T / 2 + 0.14);
+          leaf.add(pin);
+          const plate = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.5, 3.2), hingeMaterial);
+          plate.position.set(leaf.position.x + width * fraction, leaf.position.y + T / 2, -D / 2 + T / 2 + 0.1);
+          cabinet.add(plate);
+        });
+      }
+      const doorLabelRecords = [];
+      function drawDoorLabel(record) {
+        const { canvas, width, height } = record;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = 'rgba(35, 42, 47, 0.93)'; context.fillRect(5, 5, 390, 126);
+        context.strokeStyle = '#f1c36a'; context.lineWidth = 3; context.strokeRect(7, 7, 386, 122);
+        context.fillStyle = '#eff5f7'; context.font = '600 34px system-ui'; context.textAlign = 'center'; context.textBaseline = 'middle';
+        const title = record.plinth ? `${language === 'az' ? 'Sokl' : 'Цоколь'}${record.part ? ` ${record.part}` : ''}:` : (record.title || (record.mirror ? (language === 'az' ? 'Güzgülü qapı:' : 'Зеркальная дверь:') : (language === 'az' ? 'Qapı:' : 'Дверь:')));
+        context.fillText(title, 200, 42);
+        context.font = '600 31px system-ui'; context.fillText(`${Math.round(width * 10)} × ${Math.round(height * 10)} ${language === 'az' ? 'mm' : 'мм'}`, 200, 94);
+        record.texture.needsUpdate = true;
+      }
+      function doorMeasureLabel(leaf, width, height, mirror = false) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400; canvas.height = 136;
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
+        const record = { canvas, texture, width, height, mirror }; drawDoorLabel(record); doorLabelRecords.push(record);
+        const bottomHinged = leaf.userData.openAxis === 'x';
+        const labelX = bottomHinged ? 0 : leaf.userData.direction * width / 2;
+        const labelY = bottomHinged ? height / 2 : 0;
+        const addLabel = (z, rotationY) => {
+          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(24, 8.16), new THREE.MeshBasicMaterial({ map: texture, transparent: false, side: THREE.FrontSide, depthTest: true, depthWrite: true, alphaTest: 0.01 }));
+          labelMesh.position.set(labelX, labelY, z);
+          labelMesh.rotation.y = rotationY;
+          leaf.add(labelMesh);
+        };
+        // The same opaque sticker is on both faces: it remains legible after opening.
+        addLabel(-T / 2 - 0.9, Math.PI);
+        addLabel(T / 2 + 0.9, 0);
+      }
+      function plinthMeasureLabel(width, height, z, x = 0, part = '') {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400; canvas.height = 136;
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
+        const record = { canvas, texture, width, height, plinth: true, part };
+        drawDoorLabel(record); doorLabelRecords.push(record);
+        const label = new THREE.Mesh(new THREE.PlaneGeometry(20, 6.8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: false }));
+        label.position.set(x, plinthH / 2, z - 0.08); label.rotation.y = Math.PI; label.renderOrder = 6; cabinet.add(label);
+      }
+      function mirrorHighlight(leaf, width, height) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; canvas.height = 512;
+        const context = canvas.getContext('2d');
+        const gradient = context.createLinearGradient(0, 0, 256, 0);
+        gradient.addColorStop(0, 'rgba(210,225,232,0.04)');
+        gradient.addColorStop(0.42, 'rgba(245,252,255,0.24)');
+        gradient.addColorStop(0.56, 'rgba(255,255,255,0.04)');
+        gradient.addColorStop(1, 'rgba(190,210,220,0.10)');
+        context.fillStyle = gradient; context.fillRect(0, 0, 256, 512);
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
+        const pane = new THREE.Mesh(new THREE.PlaneGeometry(width - 2, height - 8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: false }));
+        // Отдельный отражающий слой чуть вынесен наружу: без z-fighting на расстоянии.
+        pane.position.set(leaf.userData.direction * width / 2, 0, -T / 2 - 0.22);
+        pane.rotation.y = Math.PI; leaf.add(pane);
+      }
+      const measureMaterial = new THREE.LineBasicMaterial({ color: 0xf1b760 });
+      const measureArrow = new THREE.MeshBasicMaterial({ color: 0xf1b760 });
+      let currentDimensionGroup = null;
+      let dimensionNumber = 0;
+      // Расстановка размерных линий, подтверждённая в локальном макете, зафиксирована и для Pages.
+      function addDimensionObject(object) { (currentDimensionGroup || dimensions).add(object); }
+      function startDimension(axis, ignoreSavedOffset = false) {
+        const group = new THREE.Group();
+        group.userData = { draggableDimension: true, axis, id: `dimension-${dimensionNumber++}` };
+        const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v5') || '{}')[group.userData.id];
+        group.userData.hasSavedOffset = !ignoreSavedOffset && typeof saved === 'number';
+        if (group.userData.hasSavedOffset) group.position[axis] = saved;
+        dimensions.add(group);
+        currentDimensionGroup = group;
+      }
+      function finishDimension() { const group = currentDimensionGroup; currentDimensionGroup = null; return group; }
+      const translatedMeasureRecords = [];
+      function measureLabel(text, x, y, z, scale = 4.8, anchor = '', translatedText = null) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.font = '600 28px system-ui';
+        const azText = mmText(translatedText ? translatedText('az') : text.replaceAll('см', 'sm').replaceAll('створки', 'qapılar').replaceAll('дверца', 'qapı'), 'az');
+        const width = Math.ceil(Math.max(context.measureText(text).width, context.measureText(azText).width)) + 36;
+        canvas.width = width; canvas.height = 46;
+        const draw = () => {
+          const labelText = mmText(translatedText ? translatedText(language) : (language === 'az' ? text.replaceAll('см', 'sm').replaceAll('створки', 'qapılar').replaceAll('дверца', 'qapı') : text), language);
+          context.clearRect(0, 0, width, 46);
+          context.font = '600 28px system-ui';
+          context.fillStyle = 'rgba(35, 42, 47, 0.93)'; context.fillRect(0, 0, width, 46);
+          context.strokeStyle = '#f1c36a'; context.lineWidth = 2; context.strokeRect(1, 1, width - 2, 44);
+          context.fillStyle = '#eff5f7'; context.fillText(labelText, 18, 33);
+        };
+        draw();
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
+        translatedMeasureRecords.push({ texture, draw });
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: true, depthWrite: false }));
+        // Все размерные ярлыки одной компактной высоты; меняется лишь ширина текста.
+        const uniformScale = 4.8;
+        const labelWidth = uniformScale * width / 46;
+        if (anchor === 'bottom') y += uniformScale / 2;
+        if (anchor === 'right') x -= labelWidth / 2;
+        sprite.position.set(x, y, z); sprite.scale.set(labelWidth, uniformScale, 1);
+        addDimensionObject(sprite);
+      }
+      function line(a, b) { addDimensionObject(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), measureMaterial)); }
+      function cone(x, y, z, axis, direction) {
+        const mesh = new THREE.Mesh(new THREE.ConeGeometry(1.6, 4.6, 6), measureArrow);
+        if (axis === 'x') mesh.rotation.z = direction > 0 ? -Math.PI / 2 : Math.PI / 2;
+        if (axis === 'y') mesh.rotation.z = direction > 0 ? 0 : Math.PI;
+        if (axis === 'z') mesh.rotation.x = direction > 0 ? Math.PI / 2 : -Math.PI / 2;
+        mesh.position.set(x, y, z); addDimensionObject(mesh);
+      }
+      function dimX(x1, x2, y, z, label, textY = y + 6, snapSpan = null, ignoreSavedOffset = false) {
+        startDimension('y', ignoreSavedOffset);
+        line(new THREE.Vector3(x1, y, z), new THREE.Vector3(x2, y, z));
+        cone(x1 + 2.3, y, z, 'x', 1); cone(x2 - 2.3, y, z, 'x', -1);
+        measureLabel(label, (x1 + x2) / 2, y, z, 9, 'bottom');
+        const group = finishDimension();
+        group.userData.snapCoordinate = y;
+        group.userData.snapSpan = snapSpan;
+        return group;
+      }
+      function dimY(x, y1, y2, z, label, labelX = x + 8, labelScale = 6.6, translatedText = null, snapSpan = null, labelY = null, ignoreSavedOffset = false) {
+        startDimension('x', ignoreSavedOffset);
+        line(new THREE.Vector3(x, y1, z), new THREE.Vector3(x, y2, z));
+        cone(x, y1 + 2.3, z, 'y', 1); cone(x, y2 - 2.3, z, 'y', -1);
+        measureLabel(label, x, labelY ?? (y1 + y2) / 2, z, labelScale, 'right', translatedText);
+        const group = finishDimension();
+        group.userData.snapCoordinate = x;
+        group.userData.snapSpan = snapSpan;
+        return group;
+      }
+      function dimZ(x, y, z1, z2, label) {
+        line(new THREE.Vector3(x, y, z1), new THREE.Vector3(x, y, z2));
+        cone(x, y, z1 + 2.3, 'z', 1); cone(x, y, z2 - 2.3, 'z', -1);
+        measureLabel(label, x + 8, y + 7, (z1 + z2) / 2, 9);
+      }
+      const surfaceLabelRecords = [];
+      function drawSurfaceLabel(record) {
+        const names = language === 'az' ? { top: 'Yuxarı:', left: 'Sol yan:', right: 'Sağ yan:' } : { top: 'Верх:', left: 'Левый бок:', right: 'Правый бок:' };
+        const context = record.canvas.getContext('2d');
+        context.clearRect(0, 0, record.canvas.width, record.canvas.height);
+        if (record.mirrorX) { context.save(); context.translate(record.canvas.width, 0); context.scale(-1, 1); }
+        context.fillStyle = 'rgba(35, 42, 47, 0.93)'; context.fillRect(0, 0, record.canvas.width, 92);
+        context.strokeStyle = '#f1c36a'; context.lineWidth = 2; context.strokeRect(1, 1, record.canvas.width - 2, 90);
+        context.fillStyle = '#eff5f7'; context.font = '600 26px system-ui'; context.textAlign = 'center'; context.textBaseline = 'middle';
+        context.fillText(names[record.kind], record.canvas.width / 2, 28);
+        context.font = '600 25px system-ui'; context.fillText(record.value, record.canvas.width / 2, 65);
+        if (record.mirrorX) context.restore();
+        record.texture.needsUpdate = true;
+      }
+      function surfaceMeasureLabel(id, kind, value, x, y, z, rotation, height = 4.8, dragAxis = 'z', side = THREE.DoubleSide, mirrorX = false) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 280; canvas.height = 92;
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter; texture.generateMipmaps = true;
+        const record = { canvas, texture, kind, value, mirrorX }; drawSurfaceLabel(record); surfaceLabelRecords.push(record);
+        const group = new THREE.Group();
+        group.userData = { draggableDimension: true, axis: dragAxis, id };
+        const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v5') || '{}')[id];
+        if (typeof saved === 'number') group.position.z = saved;
+        const width = height * canvas.width / canvas.height;
+        const label = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side, depthTest: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
+        label.position.set(x, y, z); label.rotation.set(rotation.x || 0, rotation.y || 0, rotation.z || 0);
+        group.add(label); dimensions.add(group);
+      }
+      // Внешние боковины доходят до пола и сами образуют боковые стороны цоколя.
+      // Крышка лежит сверху на стойках: боковины заканчиваются ровно под ней.
+      board(-W / 2 + T / 2, (H - T) / 2, internalBoardZ, T, H - T, internalBoardDepth);
+      board(W / 2 - T / 2, (H - T) / 2, internalBoardZ, T, H - T, internalBoardDepth);
+      // Днище зажато между боковинами, а не проходит сквозь них.
+      board(0, plinthH + T / 2, internalBoardZ, W - T * 2, T, internalBoardDepth);
+      board(0, H - T / 2, internalBoardZ, W, T, internalBoardDepth);
+      // Оргалит заходит на корпус на 8 мм по всему периметру: он перекрывает
+      // половину толщины боковин, крышки и верхней панели цоколя.
+      const rearOverlap = T / 2;
+      const rearPanelWidth = W - T;
+      const rearPanelHeight = H - plinthH - T;
+      const rearPanelBottom = innerBottom - rearOverlap;
+      const rearPanelTop = H - T + rearOverlap;
+      board(0, (rearPanelBottom + rearPanelTop) / 2, D / 2 - rearT / 2, rearPanelWidth, rearPanelHeight, rearT, rear);
+      // Цоколь не образует коробку: его лицевая часть будет разделена по трём секциям.
+      // Её фасад утоплен на 2 см, сзади отдельной стенки нет.
+      const plinthFrontZ = -D / 2 + 2 + T / 2;
+      // Внешние стороны — только компактные наклейки в формате дверей, без оранжевых полос.
+      // Верхняя карточка лежит на другой стороне, как физически перевёрнутая визитка.
+      surfaceMeasureLabel('surface-top', 'top', `${Math.round(W * 10)} × ${Math.round(D * 10)} мм`, 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
+      surfaceMeasureLabel('surface-left', 'left', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, -W / 2 - 0.32, H / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
+      surfaceMeasureLabel('surface-right', 'right', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, W / 2 + 0.32, H / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
+
+      // Центральный чистый проём фиксирован на 100 см; остаток делится поровну между боковыми секциями.
+      // Камера смотрит с фасада, поэтому экранные стороны обратны координате X.
+      const hangingWidth = 100;
+      const sideSectionWidth = (W - T * 4 - hangingWidth) / 2;
+      const entryWidth = sideSectionWidth, catWidth = sideSectionWidth;
+      const entryCenter = W / 2 - T - entryWidth / 2;
+      const entryPartition = W / 2 - T - entryWidth - T / 2;
+      const hangingCenter = entryPartition - T / 2 - hangingWidth / 2;
+      const reservePartition = hangingCenter - hangingWidth / 2 - T / 2;
+      const reserveLeft = -W / 2 + T;
+      const reserveRight = reservePartition - T / 2;
+      const reserveCenter = (reserveLeft + reserveRight) / 2;
+      const reserveWidth = reserveRight - reserveLeft;
+      // Две перегородки продолжаются до пола и работают как дополнительные ножки.
+      board(entryPartition, (H - T) / 2, internalBoardZ, T, H - T, internalBoardDepth);
+      board(reservePartition, (H - T) / 2, internalBoardZ, T, H - T, internalBoardDepth);
+      const plinthSections = [
+        [-W / 2 + T, reservePartition - T / 2],
+        [reservePartition + T / 2, entryPartition - T / 2],
+        [entryPartition + T / 2, W / 2 - T]
+      ];
+      plinthSections.forEach(([x1, x2], index) => {
+        const width = x2 - x1;
+        const x = (x1 + x2) / 2;
+        board(x, plinthH / 2, plinthFrontZ, width, plinthH, T);
+        // С точки зрения фронтального вида нумерация идёт слева направо.
+        plinthMeasureLabel(width, plinthH, plinthFrontZ - T / 2, x, String(plinthSections.length - index));
+      });
+      // Три листа оргалита показаны тонкими рамками с крестом внутри.
+      function rearPanelMark(x1, x2) {
+        const y1 = rearPanelBottom, y2 = rearPanelTop, z = D / 2 + 0.24;
+        const geometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x1, y1, z), new THREE.Vector3(x2, y2, z),
+          new THREE.Vector3(x1, y2, z), new THREE.Vector3(x2, y1, z),
+          new THREE.Vector3(x1, y1, z), new THREE.Vector3(x2, y1, z),
+          new THREE.Vector3(x2, y1, z), new THREE.Vector3(x2, y2, z),
+          new THREE.Vector3(x2, y2, z), new THREE.Vector3(x1, y2, z),
+          new THREE.Vector3(x1, y2, z), new THREE.Vector3(x1, y1, z)
+        ]);
+        const mark = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: 0x59656d, transparent: true, opacity: 0.72 }));
+        cabinet.add(mark);
+      }
+      rearPanelMark(-W / 2 + T / 2, reservePartition);
+      rearPanelMark(reservePartition, entryPartition);
+      rearPanelMark(entryPartition, W / 2 - T / 2);
+      const rearSeamMaterial = new THREE.MeshBasicMaterial({ color: 0x91a0a8, transparent: true, opacity: 0.75 });
+      function rearSeam(a, b) {
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const length = Math.hypot(dx, dy), preferredDash = 10, gap = 6;
+        // Подбираем число штрихов под конкретную длину. Первый штрих начинается
+        // от края, последний заканчивается ровно на противоположном краю.
+        const pieces = Math.max(1, Math.round((length + gap) / (preferredDash + gap)));
+        const dashLength = (length - gap * (pieces - 1)) / pieces;
+        for (let i = 0; i < pieces; i += 1) {
+          const start = i * (dashLength + gap), current = dashLength;
+          const t0 = start / length, t1 = (start + current) / length;
+          const x = a.x + dx * (t0 + t1) / 2, y = a.y + dy * (t0 + t1) / 2;
+          const horizontal = Math.abs(dx) >= Math.abs(dy);
+          const dash = new THREE.Mesh(new THREE.BoxGeometry(horizontal ? current : T, horizontal ? T : current, 0.02), rearSeamMaterial);
+          dash.position.set(x, y, D / 2 + 0.04); cabinet.add(dash);
+        }
+      }
+      // Все внутренние перегородки имеют читаемый след на задней стенке.
+      rearSeam(new THREE.Vector3(entryPartition, innerBottom, D / 2 + 0.12), new THREE.Vector3(entryPartition, H - T, D / 2 + 0.12));
+      rearSeam(new THREE.Vector3(reservePartition, innerBottom, D / 2 + 0.12), new THREE.Vector3(reservePartition, H - T, D / 2 + 0.12));
+
+      // E–H: four clear openings of exactly 250 mm from bottom to top.
+      const shoeClearHeight = 25;
+      const shoeShelfYs = Array.from({ length: 4 }, (_, index) => innerBottom + shoeClearHeight + T / 2 + index * (shoeClearHeight + T));
+      // A–D divide the remaining clear height equally.
+      const upperClearHeight = (H - T - (shoeShelfYs.at(-1) + T / 2) - T * 3) / 4;
+      const upperShelfYs = Array.from({ length: 3 }, (_, index) => shoeShelfYs.at(-1) + T / 2 + upperClearHeight + T / 2 + index * (upperClearHeight + T));
+      // Все полки оканчиваются перед оргалитом с технологическим зазором 2 мм:
+      // поверхностей, входящих друг в друга, больше нет.
+      shoeShelfYs.forEach(y => board(entryCenter, y, internalBoardZ, entryWidth, T, internalBoardDepth));
+      upperShelfYs.forEach(y => board(entryCenter, y, internalBoardZ, entryWidth, T, internalBoardDepth));
+      [...shoeShelfYs, ...upperShelfYs].forEach(y => rearSeam(new THREE.Vector3(entryPartition + T / 2, y, D / 2 + 0.12), new THREE.Vector3(W / 2 - T, y, D / 2 + 0.12)));
+
+      // Правая третья секция: открытая ниша для домика кошки. Одна полка
+      // на высоте 50 см; боковины ниши — существующие стенки секции.
+      const catShelfY = innerBottom + 50 + T / 2;
+      board(reserveCenter, catShelfY, internalBoardZ, reserveWidth, T, internalBoardDepth);
+      rearSeam(new THREE.Vector3(reserveLeft, catShelfY, D / 2 + 0.12), new THREE.Vector3(reserveRight, catShelfY, D / 2 + 0.12));
+      // Стальной профиль 20×40 мм у задней стенки переносит нагрузку верхних ячеек на днище.
+      const lSupportHeight = catShelfY - T / 2 - innerBottom;
+      const supportSteel = new THREE.MeshStandardMaterial({ color: 0x434c53, roughness: 0.36, metalness: 0.82 });
+      board(reserveCenter, innerBottom + lSupportHeight / 2, D / 2 - rearT - 2 - rearClearance, 2, lSupportHeight, 4, supportSteel);
+      // Скрытый уголок показывает обязательное крепление высокого корпусного шкафа к стене.
+      const wallBracket = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 2), supportSteel);
+      wallBracket.position.set(reserveCenter, H - T - 6, D / 2 + 0.8); cabinet.add(wallBracket);
+      const wallBracketCenter = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 2), supportSteel);
+      wallBracketCenter.position.set(entryPartition, H - T - 6, D / 2 + 0.8); cabinet.add(wallBracketCenter);
+
+      // Центральная секция: нижний и верхний проём по 35 см.
+      // Штанга располагается непосредственно под верхней полкой.
+      // Нижний проём I сохраняет 35 см; восемь сантиметров снимаются только у J под штангой.
+      const lowerCenterShelfY = innerBottom + 35 + T / 2;
+      const upperCenterShelfY = H - T - 35 - T / 2;
+      board(hangingCenter, lowerCenterShelfY, internalBoardZ, hangingWidth, T, internalBoardDepth);
+      board(hangingCenter, upperCenterShelfY, internalBoardZ, hangingWidth, T, internalBoardDepth);
+      rearSeam(new THREE.Vector3(reservePartition + T / 2, lowerCenterShelfY, D / 2 + 0.12), new THREE.Vector3(entryPartition - T / 2, lowerCenterShelfY, D / 2 + 0.12));
+      rearSeam(new THREE.Vector3(reservePartition + T / 2, upperCenterShelfY, D / 2 + 0.12), new THREE.Vector3(entryPartition - T / 2, upperCenterShelfY, D / 2 + 0.12));
+
+      // Маркеры на задних стенках каждого внутреннего прямоугольного проёма.
+      // Спрайты специально всегда развёрнуты к камере, чтобы буквы читались в 3D.
+      const rearLabelZ = D / 2 - T - 0.8;
+      const shoeOpenings = [[innerBottom, shoeShelfYs[0] - T / 2], ...shoeShelfYs.slice(1).map((y, index) => [shoeShelfYs[index] + T / 2, y - T / 2])];
+      const shelfOpenings = [[shoeShelfYs.at(-1) + T / 2, upperShelfYs[0] - T / 2], ...upperShelfYs.slice(1).map((y, index) => [upperShelfYs[index] + T / 2, y - T / 2]), [upperShelfYs.at(-1) + T / 2, H - T]];
+      // Проёмы строятся снизу вверх, поэтому буквы присваиваются в обратном
+      // порядке: сверху вниз получится A, B, C, D, E, F, G, H.
+      [...shoeOpenings, ...shelfOpenings].forEach(([bottom, top], index) =>
+        sectionLabel(String.fromCharCode(72 - index), entryCenter, (bottom + top) / 2, rearLabelZ, entryWidth, top - bottom)
+      );
+      sectionLabel('I', hangingCenter, (innerBottom + lowerCenterShelfY - T / 2) / 2, rearLabelZ, hangingWidth, lowerCenterShelfY - innerBottom);
+      sectionLabel('J', hangingCenter, (lowerCenterShelfY + T / 2 + upperCenterShelfY - T / 2) / 2, rearLabelZ, hangingWidth, upperCenterShelfY - lowerCenterShelfY - T);
+      sectionLabel('K', hangingCenter, (upperCenterShelfY + T / 2 + H - T) / 2, rearLabelZ, hangingWidth, H - upperCenterShelfY - T);
+
+      // Над нишей C пространство делится пополам после открытия одной дверцы.
+      const upperCatBottom = catShelfY + T / 2;
+      const upperCatHeight = H - T - upperCatBottom;
+      board(reserveCenter, upperCatBottom + upperCatHeight / 2, internalBoardZ, T, upperCatHeight, internalBoardDepth);
+      // На задней стороне отмечаем положение короткого внутреннего разделителя.
+      // Разделитель имеет ту же глубину, что и опорная полка.
+      rearSeam(new THREE.Vector3(reserveCenter, upperCatBottom, D / 2 + 0.22), new THREE.Vector3(reserveCenter, H - T, D / 2 + 0.22));
+      // L выводится ближе к фасаду, чтобы его не перекрывала откидная створка.
+      sectionLabel('L', reserveCenter, (innerBottom + catShelfY - T / 2) / 2, rearLabelZ - 1.5, reserveWidth, catShelfY - innerBottom);
+      // M/P имеют чистую высоту 143 см. Оставшиеся N/Q и O/R делят свободный остаток поровну.
+      const lowerCatClearHeight = 143;
+      const upperCatAvailable = H - T - upperCatBottom;
+      const upperCatRowHeight = (upperCatAvailable - lowerCatClearHeight - T * 2) / 2;
+      const lowerSplitShelfY = upperCatBottom + lowerCatClearHeight + T / 2;
+      const upperSplitShelfY = lowerSplitShelfY + T + upperCatRowHeight;
+      // Массив хранится сверху вниз: это соответствует формулам catUpperOpenings ниже.
+      const upperSplitShelfYs = [upperSplitShelfY, lowerSplitShelfY];
+      const catLeftCenter = (reserveLeft + reserveCenter - T / 2) / 2;
+      const catRightCenter = (reserveCenter + T / 2 + reserveRight) / 2;
+      const catMeasureHalfWidth = (reserveWidth - T) / 2;
+      upperSplitShelfYs.forEach(y => {
+        board(catLeftCenter, y, internalBoardZ, catMeasureHalfWidth, T, internalBoardDepth);
+        board(catRightCenter, y, internalBoardZ, catMeasureHalfWidth, T, internalBoardDepth);
+        rearSeam(new THREE.Vector3(reserveLeft, y, D / 2 + 0.12), new THREE.Vector3(reserveRight, y, D / 2 + 0.12));
+      });
+      const catUpperOpenings = [
+        [upperCatBottom, upperSplitShelfYs[1] - T / 2],
+        [upperSplitShelfYs[1] + T / 2, upperSplitShelfYs[0] - T / 2],
+        [upperSplitShelfYs[0] + T / 2, H - T]
+      ];
+      // Все проёмы получают уникальные буквы: без цифр и повторяющихся обозначений.
+      const catOpeningLetters = [['M', 'N', 'O'], ['P', 'Q', 'R']];
+      catUpperOpenings.forEach(([bottom, top], row) => {
+        sectionLabel(catOpeningLetters[0][row], catLeftCenter, (bottom + top) / 2, rearLabelZ, catMeasureHalfWidth, top - bottom);
+        sectionLabel(catOpeningLetters[1][row], catRightCenter, (bottom + top) / 2, rearLabelZ, catMeasureHalfWidth, top - bottom);
+      });
+
+      // Первая дверца закрывает A–D; E–F остаются открыты; вторая закрывает G–H.
+      // B — две створки на всю высоту.
+      // В C полупрозрачная дверца закрывает только пространство над кошачьей нишей.
+      const doorZ = -D / 2 - T / 2;
+      // Tall facades cover the upper 20 mm panel as well as the inner opening.
+      const facadeTop = H + 0.7;
+      const internalHeight = facadeTop - plinthH;
+      // Нижние фасады перекрывают лицевой торец днища и начинаются от цоколя.
+      const shoeDoorBottom = plinthH;
+      const shoeDoorTop = shoeShelfYs.at(-1) + T / 2;
+      const shoeDoorHeight = shoeDoorTop - shoeDoorBottom;
+      // Накладные фасады перекрывают боковины на толщину плиты, а не остаются внутри проёма.
+      // У боковых фасадов только один общий край с зеркалом: оставляем там 3 мм.
+      const singleDoorWidth = entryWidth + T - 0.3;
+      const rightDoorWidth = reserveWidth + T - 0.3;
+      const doorGap = 0.3;
+      const sideDoorWidth = (singleDoorWidth - doorGap) / 2;
+      const reserveDoorWidth = (rightDoorWidth - doorGap) / 2;
+      // Правая секция: каждый фасад состоит из двух распашных створок.
+      const shoeOuterLeaf = doorPanel(W / 2, (shoeDoorBottom + shoeDoorTop) / 2, doorZ, sideDoorWidth, shoeDoorHeight, -1);
+      const shoeInnerLeaf = doorPanel(W / 2 - singleDoorWidth, (shoeDoorBottom + shoeDoorTop) / 2, doorZ, sideDoorWidth, shoeDoorHeight, 1);
+      // Створка A/B опускается на верхний торец полки C и перекрывает его на 7 мм.
+      // Фасад A/B перекрывает торец полки между B и C, а не оставляет его видимым.
+      const upperDoorBottom = upperShelfYs[1] - T / 2 - 0.7;
+      const upperDoorTop = facadeTop;
+      const upperDoorHeight = upperDoorTop - upperDoorBottom;
+      const upperOuterLeaf = doorPanel(W / 2, (upperDoorBottom + upperDoorTop) / 2, doorZ, sideDoorWidth, upperDoorHeight, -1);
+      const upperInnerLeaf = doorPanel(W / 2 - singleDoorWidth, (upperDoorBottom + upperDoorTop) / 2, doorZ, sideDoorWidth, upperDoorHeight, 1);
+      const centerLeftDoor = reservePartition - T / 2;
+      const centerRightDoor = entryPartition + T / 2;
+      const centerDoorWidth = (hangingWidth + T * 2 - doorGap) / 2;
+      const centerDoorY = (plinthH + facadeTop) / 2;
+      const centerLeftLeaf = doorPanel(centerLeftDoor, centerDoorY, doorZ, centerDoorWidth, internalHeight, 1, centerDoorMaterials);
+      const centerRightLeaf = doorPanel(centerRightDoor, centerDoorY, doorZ, centerDoorWidth, internalHeight, -1, centerDoorMaterials);
+      // Левая секция: верхний фасад также разделён на две распашные створки.
+      const rightDoorBottom = upperCatBottom - 0.7;
+      const rightDoorHeight = facadeTop - rightDoorBottom;
+      const reserveOuterLeaf = doorPanel(-W / 2, rightDoorBottom + rightDoorHeight / 2, doorZ, reserveDoorWidth, rightDoorHeight, 1);
+      const reserveInnerLeaf = doorPanel(-W / 2 + rightDoorWidth, rightDoorBottom + rightDoorHeight / 2, doorZ, reserveDoorWidth, rightDoorHeight, -1);
+      // Нижняя правая створка открывается вниз: ось и обе петли находятся снизу.
+      const lowerRightDoorHeight = catShelfY - T / 2 + 0.7 - plinthH;
+      const lowerRightDoor = bottomHingedDoor(-W / 2 + rightDoorWidth / 2, plinthH, doorZ, rightDoorWidth, lowerRightDoorHeight);
+      // Зеркальные центральные створки: ручки у встречных краёв.
+      // Ручки всех пар стоят у встречных краёв.
+      doorHandle(shoeOuterLeaf, -sideDoorWidth + 3);
+      doorHandle(shoeInnerLeaf, sideDoorWidth - 3);
+      doorHandle(upperOuterLeaf, -sideDoorWidth + 3);
+      doorHandle(upperInnerLeaf, sideDoorWidth - 3);
+      doorHandle(centerLeftLeaf, centerDoorWidth - 1.8);
+      doorHandle(centerRightLeaf, -centerDoorWidth + 1.8);
+      doorHandle(reserveOuterLeaf, reserveDoorWidth - 3);
+      doorHandle(reserveInnerLeaf, -reserveDoorWidth + 3);
+      // У откидной створки ручка стоит на свободном верхнем крае, не на оси нижних петель.
+      horizontalDoorHandle(lowerRightDoor, 0, lowerRightDoorHeight - 3, -1.2);
+      // Размеры размещены на внутренней стороне каждой дверцы и видны в распахнутом состоянии.
+      doorMeasureLabel(shoeOuterLeaf, sideDoorWidth, shoeDoorHeight);
+      doorMeasureLabel(shoeInnerLeaf, sideDoorWidth, shoeDoorHeight);
+      doorMeasureLabel(upperOuterLeaf, sideDoorWidth, upperDoorHeight);
+      doorMeasureLabel(upperInnerLeaf, sideDoorWidth, upperDoorHeight);
+      doorMeasureLabel(centerLeftLeaf, centerDoorWidth, internalHeight, true);
+      doorMeasureLabel(centerRightLeaf, centerDoorWidth, internalHeight, true);
+      mirrorHighlight(centerLeftLeaf, centerDoorWidth, internalHeight);
+      mirrorHighlight(centerRightLeaf, centerDoorWidth, internalHeight);
+      doorMeasureLabel(reserveOuterLeaf, reserveDoorWidth, rightDoorHeight);
+      doorMeasureLabel(reserveInnerLeaf, reserveDoorWidth, rightDoorHeight);
+      doorMeasureLabel(lowerRightDoor, rightDoorWidth, lowerRightDoorHeight);
+      // Петли вертикальных створок видны только с внутренней стороны.
+      doorHinges(shoeOuterLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
+      doorHinges(shoeInnerLeaf, 0, shoeDoorHeight, 2, [-0.39, 0.39]);
+      doorHinges(upperOuterLeaf, 0, upperDoorHeight, 2);
+      doorHinges(upperInnerLeaf, 0, upperDoorHeight, 2);
+      // Крайние петли центральных зеркальных створок стоят в K и I, не на полках.
+      doorHinges(centerLeftLeaf, 0, internalHeight, 3, [-0.43, 0, 0.43]);
+      doorHinges(centerRightLeaf, 0, internalHeight, 3, [-0.43, 0, 0.43]);
+      doorHinges(reserveOuterLeaf, 0, rightDoorHeight, 3, [-0.44, 0, 0.44]);
+      doorHinges(reserveInnerLeaf, 0, rightDoorHeight, 3, [-0.44, 0, 0.44]);
+      bottomDoorHinges(lowerRightDoor, rightDoorWidth);
+
+      // Размерные линии: каждая внутренняя стрелка стоит в своём реальном проёме.
+      // Все рабочие оранжевые размеры находятся на 15 см внутри корпуса.
+      const frontZ = -D / 2 + 15;
+      // Общие габариты остаются вне конструкции.
+      // Габариты самих фасадов: ширина и высота каждой дверцы, не только проёмов.
+      const doorDimStart = dimensions.children.length;
+      const measureCenterLeft = reservePartition + T / 2;
+      const shoeDoorWidth = sideDoorWidth;
+      dimX(W / 2 - singleDoorWidth, W / 2 - sideDoorWidth - doorGap, shoeDoorHeight / 2, frontZ - 4, `${shoeDoorWidth.toFixed(1)} см — створка`, shoeDoorHeight / 2 + 7, [shoeDoorBottom, shoeDoorTop]);
+      dimY(W / 2 - 8, shoeDoorBottom, shoeDoorTop, frontZ - 4, `${shoeDoorHeight.toFixed(1)} см — две створки`, W / 2 - 20, 5.4);
+      dimX(W / 2 - singleDoorWidth, W / 2 - sideDoorWidth - doorGap, (upperDoorBottom + upperDoorTop) / 2, frontZ - 4, `${shoeDoorWidth.toFixed(1)} см — створка`, (upperDoorBottom + upperDoorTop) / 2 + 7, [upperDoorBottom, upperDoorTop]);
+      dimY(W / 2 - 8, upperDoorBottom, upperDoorTop, frontZ - 4, `${upperDoorHeight.toFixed(1)} см — две створки`, W / 2 - 20, 5.4);
+      dimX(centerLeftDoor, centerLeftDoor + centerDoorWidth, centerDoorY, frontZ - 4, `${centerDoorWidth.toFixed(1)} см`, centerDoorY + 7, [plinthH, H - T]);
+      dimX(centerRightDoor - centerDoorWidth, centerRightDoor, centerDoorY, frontZ - 4, `${centerDoorWidth.toFixed(1)} см`, centerDoorY + 7, [plinthH, H - T]);
+      dimY(measureCenterLeft + 5, plinthH, H - T, frontZ - 4, `${internalHeight.toFixed(1)} см — створки`, measureCenterLeft + 17, 5.0);
+      dimX(reserveLeft - T, reserveLeft + reserveDoorWidth, rightDoorBottom + rightDoorHeight / 2, frontZ - 4, `${reserveDoorWidth.toFixed(1)} см — створка`, rightDoorBottom + rightDoorHeight / 2 + 7, [rightDoorBottom, H - T]);
+      dimY(reserveLeft + 5, rightDoorBottom, H - T, frontZ - 4, `${rightDoorHeight.toFixed(1)} см — две створки`, reserveLeft + 17, 5.0);
+      dimensions.children.splice(doorDimStart).forEach(item => doorDimensions.add(item));
+      // Левая обувница: три реальные чистые высоты между соседними полками.
+      const shoeGaps = [[innerBottom, shoeShelfYs[0] - T / 2], ...shoeShelfYs.slice(1).map((y, index) => [shoeShelfYs[index] + T / 2, y - T / 2])];
+      // The front camera mirrors X: the visual left inner edge is the larger X value.
+      const entryMarkerX = (W / 2 - T) - entryWidth * 0.25;
+      shoeGaps.forEach(([bottom, top]) => {
+        dimY(entryMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, entryMarkerX + 8, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
+      });
+      // Полки выше обувницы: каждый подписанный просвет расположен между своими полками.
+      const upperShelfGaps = [[shoeShelfYs.at(-1) + T / 2, upperShelfYs[0] - T / 2], ...upperShelfYs.slice(1).map((y, index) => [upperShelfYs[index] + T / 2, y - T / 2]), [upperShelfYs.at(-1) + T / 2, H - T]];
+      upperShelfGaps.forEach(([bottom, top]) => {
+        dimY(entryMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, entryMarkerX + 8, 5.6, null, [entryPartition + T / 2, W / 2 - T]);
+      });
+      // В каждом прямоугольнике A своя горизонтальная ширина.
+      [...shoeGaps, ...upperShelfGaps].forEach(([bottom, top]) => {
+        const mid = (bottom + top) / 2;
+        dimX(entryPartition + T / 2, W / 2 - T, mid, frontZ, `${entryWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
+      });
+      // Центральная секция: отдельная высота штанги; размеры проёмов ниже.
+      const rodY = upperCenterShelfY - T / 2 - 7;
+      const rodZ = 0; // штанга и её измеритель лежат по центру глубины корпуса
+      const centerLeft = reservePartition + T / 2;
+      const centerRight = entryPartition - T / 2;
+      const lowerShelfTop = lowerCenterShelfY + T / 2;
+      const rodText = (lang = language) => `${(rodY - lowerShelfTop).toFixed(1)} ${lang === 'az' ? 'sm — asqı borusu' : 'см — штанга'}`;
+      // Указатель штанги ходит вдоль неё и цепляется за её доли, а верхняя стрелка
+      // останавливается под трубой, не проходя сквозь неё.
+      // Visual-left origin in J: 25% is its vertical marker; the rod is at 35%.
+      const rodDimensionX = centerRight - hangingWidth * 0.35;
+      const rodDimension = dimY(rodDimensionX, lowerShelfTop, rodY - 1.8, rodZ, rodText(), centerLeft + 30, 5.2, rodText, [centerLeft, centerRight]);
+      // В каждом прямоугольнике B — своя ширина и своя высота.
+      const centerOpenings = [[innerBottom, lowerCenterShelfY - T / 2], [lowerCenterShelfY + T / 2, upperCenterShelfY - T / 2], [upperCenterShelfY + T / 2, H - T]];
+      centerOpenings.forEach(([bottom, top], index) => {
+        const mid = (bottom + top) / 2;
+        dimX(centerLeft, centerRight, mid, frontZ, `${hangingWidth.toFixed(1)} см`, mid + 6, [bottom, top]);
+        const centerMarkerX = centerRight - hangingWidth * 0.25;
+        dimY(centerMarkerX, bottom, top, frontZ, `${(top - bottom).toFixed(1)} см`, centerMarkerX + 8, 5.0);
+      });
+      // C: нижняя ниша и каждый прямоугольник M/N получают обе размерные стрелки.
+      const catHalfWidth = (reserveWidth - T) / 2;
+      dimX(reserveLeft, reserveRight, (innerBottom + catShelfY - T / 2) / 2, frontZ, `${catWidth.toFixed(1)} см`, 28, [innerBottom, catShelfY - T / 2]);
+      // L владеет всей нижней правой нишей; его линия не может уйти в левую
+      // половину верхних ячеек или за внутреннюю опорную перегородку.
+      const reserveMarkerX = reserveRight - reserveWidth * 0.25;
+      dimY(reserveMarkerX, innerBottom, catShelfY - T / 2, frontZ, '50 см', reserveMarkerX + 8, 5.4, null, [reserveLeft, reserveRight]);
+      [[reserveLeft, reserveCenter - T / 2], [reserveCenter + T / 2, reserveRight]].forEach(([x1, x2], index) => {
+        catUpperOpenings.forEach(([bottom, top], row) => {
+          const height = top - bottom;
+          // Горизонтальная отметка стоит в нижней четверти своей ячейки.
+          const horizontalY = bottom + height * 0.25;
+          dimX(x1, x2, horizontalY, frontZ, `${catHalfWidth.toFixed(1)} см`, horizontalY + 6, [bottom, top], true);
+          // In the front view, screen-left maps to the larger X coordinate.
+          const vectorX = x2 - (x2 - x1) * 0.25;
+          dimY(vectorX, bottom, top, frontZ, `${height.toFixed(1)} см`, vectorX + 10, 4.8, null, [x1, x2], null, true);
+        });
+      });
+
+      const metal = new THREE.MeshStandardMaterial({ color: 0x3c4449, roughness: 0.3, metalness: 0.8 });
+      function cylinder(x, y, z, radius, length, axis) {
+        const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 24), metal);
+        if (axis === 'x') mesh.rotation.z = Math.PI / 2;
+        if (axis === 'z') mesh.rotation.x = Math.PI / 2;
+        mesh.position.set(x, y, z);
+        mesh.castShadow = true;
+        cabinet.add(mesh);
+      }
+      // Штанга проходит почти от внутреннего края до внутреннего края секции.
+      cylinder(hangingCenter, rodY, rodZ, 1.5, hangingWidth - 2, 'x');
+      cylinder(hangingCenter - hangingWidth / 2 + 2.5, rodY - 6, rodZ, 1.15, 15, 'y');
+      cylinder(hangingCenter + hangingWidth / 2 - 2.5, rodY - 6, rodZ, 1.15, 15, 'y');
+
+      scene.add(new THREE.HemisphereLight(0xf3f6f7, 0x3d474e, 2.1));
+      const key = new THREE.DirectionalLight(0xf6f8f9, 2.8);
+      key.position.set(240, 420, 330);
+      key.castShadow = true;
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xdce6ea, 0.85);
+      fill.position.set(-250, 180, 140);
+      scene.add(fill);
+      // Мягкий фронтальный свет убирает серые провалы на боковых и фасадных плоскостях.
+      const frontFill = new THREE.DirectionalLight(0xffffff, 1.35);
+      frontFill.position.set(0, 240, -380);
+      scene.add(frontFill);
+
+      // Настоящее, но очень лёгкое отражение: кубическая карта 128 px считается ровно один раз.
+      // При вращении шкафа новых рендеров нет, поэтому слабый телефон не будет подвисать.
+      const reflectionTarget = new THREE.WebGLCubeRenderTarget(128, {
+        generateMipmaps: true,
+        minFilter: THREE.LinearMipmapLinearFilter,
+        magFilter: THREE.LinearFilter
+      });
+      const reflectionProbe = new THREE.CubeCamera(5, 1000, reflectionTarget);
+      reflectionProbe.position.set(hangingCenter, H * 0.52, -D / 2 - 4);
+      scene.add(reflectionProbe);
+      const visibleBeforeProbe = doorsGroup.visible;
+      const dimensionsBeforeProbe = dimensions.visible;
+      const backgroundBeforeProbe = scene.background;
+      doorsGroup.visible = false;
+      dimensions.visible = false;
+      // Нейтральная светлая среда попадает в карту и делает отражение различимым.
+      scene.background = new THREE.Color(0xc7d3da);
+      reflectionProbe.update(renderer, scene);
+      doorsGroup.visible = visibleBeforeProbe;
+      dimensions.visible = dimensionsBeforeProbe;
+      scene.background = backgroundBeforeProbe;
+      scene.remove(reflectionProbe);
+      centerDoorMaterial.envMap = reflectionTarget.texture;
+      centerDoorMaterial.envMapIntensity = 1.7;
+      centerDoorMaterial.needsUpdate = true;
+
+      let activeView = 'iso';
+      function viewDistance(extra = 35) { return Math.max(790, (W / 2 + extra) / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect)); }
+      function front() { const distance = viewDistance(); camera.position.set(0, H * 0.55, -distance); controls.target.set(0, H * 0.5, 0); controls.update(); activeView = 'front'; }
+      function iso() { const distance = viewDistance(85); const scale = distance / Math.hypot(430, 610); camera.position.set(430 * scale, H * 0.76, -610 * scale); controls.target.set(0, H * 0.48, 0); controls.update(); activeView = 'iso'; }
+      function setButton(active) { document.getElementById('front').setAttribute('aria-pressed', String(active === 'front')); document.getElementById('iso').setAttribute('aria-pressed', String(active === 'iso')); }
+      document.getElementById('front').addEventListener('click', () => { front(); setButton('front'); });
+      document.getElementById('iso').addEventListener('click', () => { iso(); setButton('iso'); });
+      // По умолчанию фасады физически распахнуты на 90°; при закрытии встают в фасад.
+      let doorsOpen = true;
+      function setDoorState() {
+        doorLeaves.forEach(leaf => {
+          leaf.rotation.set(0, 0, 0);
+          if (leaf.userData.closedX !== undefined) leaf.position.x = leaf.userData.closedX;
+          leaf.position.z = leaf.userData.closedZ;
+          if (leaf.userData.outline) leaf.userData.outline.visible = doorsOpen;
+          if (doorsOpen) {
+            leaf.rotation[leaf.userData.openAxis || 'y'] = leaf.userData.openRotation;
+            leaf.position.x += leaf.userData.openSideOffset || 0;
+          }
+        });
+      }
+      setDoorState();
+      doorDimensions.visible = false;
+      document.getElementById('doors').addEventListener('click', event => {
+        doorsOpen = !doorsOpen;
+        setDoorState();
+        doorDimensions.visible = false;
+        event.currentTarget.textContent = doorsOpen ? translations[language].closeDoors : translations[language].openDoors;
+        event.currentTarget.setAttribute('aria-pressed', String(!doorsOpen));
+      });
+      let doorsHidden = false;
+      document.getElementById('hide-doors').addEventListener('click', event => {
+        doorsHidden = !doorsHidden;
+        doorsGroup.visible = !doorsHidden;
+        doorDimensions.visible = false;
+        document.getElementById('doors').disabled = doorsHidden;
+        event.currentTarget.textContent = doorsHidden ? translations[language].showDoors : translations[language].hideDoors;
+        event.currentTarget.setAttribute('aria-pressed', String(doorsHidden));
+      });
+      document.getElementById('snapshot').addEventListener('click', () => {
+        renderer.render(scene, camera);
+        const link = document.createElement('a');
+        link.download = 'maket-shkafa.png'; link.href = renderer.domElement.toDataURL('image/png'); link.click();
+      });
+      const translations = {
+        ru: { title: 'Шкаф для ниши', info: 'Информация', closeInfo: 'Закрыть информацию', touchHint: 'Для навигации используйте два пальца', subtitle: 'Каждый внутренний прямоугольный проём отмечен своей буквой.', front: 'Вид спереди', iso: 'Изометрия', closeDoors: 'Закрыть дверцы', openDoors: 'Открыть дверцы', hideDoors: 'Скрыть дверцы', showDoors: 'Показать дверцы', shot: 'Сохранить PNG', lang: 'AZ', dimensions: 'Ширина 2900 мм × глубина 520 мм × высота 2600 мм', dimensionsNote: 'Высота 2600 мм.', depthNote: 'Корпус: 500 мм; ЛДСП: 20 мм; задняя стенка: 3,2 мм.', mount: 'Корпус необходимо закрепить к стене.', measure: 'Размеры указаны в миллиметрах', fallback: 'Браузер не дал запустить 3D-сцену. Сообщи мне — сделаю другой локальный рендер.' },
+        az: { title: 'Niş üçün dolab', info: 'Məlumat', closeInfo: 'Məlumatı bağla', touchHint: 'Naviqasiya üçün iki barmaqdan istifadə edin', subtitle: 'Hər daxili düzbucaqlı bölmə ayrıca hərflə işarələnib.', front: 'Ön görünüş', iso: 'İzometriya', closeDoors: 'Qapıları bağla', openDoors: 'Qapıları aç', hideDoors: 'Qapıları gizlət', showDoors: 'Qapıları göstər', shot: 'PNG saxla', lang: 'RU', dimensions: 'En 2900 mm × dərinlik 520 mm × hündürlük 2600 mm', dimensionsNote: 'Hündürlük 2600 mm-dir.', depthNote: 'Korpus: 500 mm; LDP: 20 mm; arxa divar: 3,2 mm.', mount: 'Korpusu divara bərkitmək vacibdir.', measure: 'Ölçülər millimetrlə göstərilib', fallback: 'Brauzer 3D-səhnəni işə sala bilmədi. Mənə yazın — başqa yerli render hazırlayacağam.' }
+      };
+      function applyLanguage(updateUrl = false) {
+        const t = translations[language];
+        document.getElementById('title').textContent = t.title;
+        document.getElementById('info-toggle').textContent = t.info;
+        document.getElementById('info-heading').textContent = t.info;
+        document.getElementById('info-close').setAttribute('aria-label', t.closeInfo);
+        document.getElementById('touch-hint').textContent = t.touchHint;
+        document.getElementById('subtitle').textContent = t.subtitle;
+        document.getElementById('front').textContent = t.front;
+        document.getElementById('iso').textContent = t.iso;
+        document.getElementById('doors').textContent = doorsOpen ? t.closeDoors : t.openDoors;
+        document.getElementById('hide-doors').textContent = doorsHidden ? t.showDoors : t.hideDoors;
+        document.getElementById('snapshot').textContent = t.shot;
+        document.getElementById('lang').textContent = t.lang;
+        document.getElementById('dimensions-title').textContent = t.dimensions;
+        document.getElementById('dimensions-note').textContent = t.dimensionsNote;
+        document.getElementById('depth-note').textContent = t.depthNote;
+        document.getElementById('mount-note').textContent = t.mount;
+        document.getElementById('measure-note').textContent = t.measure;
+        document.getElementById('fallback').textContent = t.fallback;
+        doorLabelRecords.forEach(drawDoorLabel);
+        surfaceLabelRecords.forEach(drawSurfaceLabel);
+        rearLabelRecords.forEach(drawRearLabel);
+        translatedMeasureRecords.forEach(record => { record.draw(); record.texture.needsUpdate = true; });
+        if (updateUrl) {
+          const url = new URL(location.href);
+          url.search = language === 'az' ? '?az' : '';
+          history.replaceState(null, '', url);
+        }
+      }
+      document.getElementById('lang').addEventListener('click', () => {
+        language = language === 'ru' ? 'az' : 'ru';
+        applyLanguage(true);
+      });
+      if (language === 'az') applyLanguage();
+      // У каждой линии есть собственный проём: если он не передан явно при
+      // создании, определяем его по исходной позиции. Это единое правило для
+      // любых новых полок и секций, а не набор исключений по буквам.
+      function inferDimensionSnapSpan(group) {
+        if (group.userData.axis === 'x') {
+          // Владелец определяется по исходной линии, а не по уже вручную
+          // сдвинутой позиции: иначе после сохранения указатель мог «сменить» блок.
+          const x = group.userData.snapCoordinate ?? group.position.x;
+          const spans = [[reserveLeft, reserveRight], [reservePartition + T / 2, entryPartition - T / 2], [entryPartition + T / 2, W / 2 - T]];
+          return spans.find(([from, to]) => x >= from && x <= to) || spans.reduce((best, span) => Math.abs((span[0] + span[1]) / 2 - x) < Math.abs((best[0] + best[1]) / 2 - x) ? span : best, spans[0]);
+        }
+        if (group.userData.axis === 'y') {
+          const y = group.userData.snapCoordinate ?? group.position.y;
+          const spans = [...shoeOpenings, ...shelfOpenings, ...centerOpenings, ...catUpperOpenings, [innerBottom, H - T]];
+          return spans.find(([from, to]) => y >= from && y <= to) || [innerBottom, H - T];
+        }
+        return [-D / 2, D / 2];
+      }
+      // Запоминаем исходную позицию каждой линии: она нужна для корректного
+      // прилипания соседних указателей в общем мировом пространстве.
+      dimensions.traverse(group => {
+        if (!group.userData.draggableDimension) return;
+        group.userData.basePosition = new THREE.Vector3();
+        group.userData.basePosition[group.userData.axis] = group.userData.snapCoordinate ?? 0;
+        group.userData.snapSpan = group.userData.snapSpan || inferDimensionSnapSpan(group);
+        // Нерасставленные линии стартуют сразу на ближайшей сеточной отметке,
+        // а уже вручную сохранённые позиции пользователя не изменяются.
+        if (!group.userData.hasSavedOffset && typeof group.userData.snapCoordinate === 'number') {
+          const [from, to] = group.userData.snapSpan;
+          const marks = [0, 1 / 4, 1 / 3, 1 / 2, 2 / 3, 3 / 4, 1].map(fraction => from + (to - from) * fraction);
+          const nearest = marks.reduce((best, mark) => Math.abs(mark - group.userData.snapCoordinate) < Math.abs(best - group.userData.snapCoordinate) ? mark : best, marks[0]);
+          group.position[group.userData.axis] = nearest - group.userData.snapCoordinate;
+        }
+      });
+      // Режим ручной расстановки размерных линий. Линии прилипают к сетке
+      // (центр, половины, трети, четверти) и к положению соседних указателей.
+      const raycaster = new THREE.Raycaster();
+      raycaster.params.Line.threshold = 5;
+      raycaster.params.Sprite.threshold = 8;
+      const pointer = new THREE.Vector2();
+      const dragPlane = new THREE.Plane();
+      let dragState = null;
+      let dimensionEditing = false;
+      const editDimensionsButton = document.getElementById('edit-dimensions');
+      const resetDimensionsButton = document.getElementById('reset-dimensions');
+      function setDimensionEditing(enabled) {
+        dimensionEditing = enabled;
+        editDimensionsButton.setAttribute('aria-pressed', String(enabled));
+        editDimensionsButton.textContent = enabled ? 'Готово' : 'Править указатели';
+        resetDimensionsButton.hidden = !enabled;
+        // В режиме правки сцена по-прежнему должна ощущаться как обычный 3D-вид:
+        // курсор не превращается в крест, а пустое место свободно вращает камеру.
+        renderer.domElement.style.cursor = 'grab';
+      }
+      editDimensionsButton.addEventListener('click', () => setDimensionEditing(!dimensionEditing));
+      resetDimensionsButton.addEventListener('click', () => {
+        localStorage.removeItem('wardrobe-dimension-offsets-v5');
+        dimensions.traverse(group => { if (group.userData.draggableDimension) group.position[group.userData.axis] = 0; });
+        if (location.hostname === '127.0.0.1') fetch('/layout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offsets: {} }), keepalive: true }).catch(() => {});
+      });
+      function snapDimensionOffset(group, axis, proposed) {
+        const base = group.userData.basePosition[axis];
+        const world = base + proposed;
+        const [from, to] = group.userData.snapSpan;
+        const low = Math.min(from, to), high = Math.max(from, to);
+        const candidates = [0, 1 / 4, 1 / 3, 1 / 2, 2 / 3, 3 / 4, 1].map(fraction => low + (high - low) * fraction);
+        // Позиции соседних указателей становятся дополнительными точками, но
+        // только если они физически лежат в пределах текущего проёма. Так L
+        // может совпасть с P, не получая возможности выйти из своего блока.
+        dimensions.traverse(other => {
+          if (other === group || !other.userData.draggableDimension || other.userData.axis !== axis || !other.userData.basePosition) return;
+          const otherWorld = other.userData.basePosition[axis] + other.position[axis];
+          if (otherWorld >= low && otherWorld <= high) candidates.push(otherWorld);
+        });
+        let best = THREE.MathUtils.clamp(world, low, high), distance = 10;
+        candidates.forEach(candidate => {
+          const nextDistance = Math.abs(candidate - world);
+          if (nextDistance < distance) { best = candidate; distance = nextDistance; }
+        });
+        return THREE.MathUtils.clamp(best - base, -120, 120);
+      }
+      function getPointer(event) {
+        const box = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - box.left) / box.width) * 2 - 1;
+        pointer.y = -((event.clientY - box.top) / box.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+      }
+      function dimensionParent(object) {
+        let node = object;
+        while (node && !node.userData.draggableDimension) node = node.parent;
+        return node;
+      }
+      renderer.domElement.addEventListener('pointerdown', event => {
+        if (!dimensionEditing) return;
+        getPointer(event);
+        const hit = raycaster.intersectObjects(dimensions.children, true)[0];
+        const group = hit && dimensionParent(hit.object);
+        if (!group) return;
+        const axis = group.userData.axis;
+        group.userData.basePosition = group.userData.basePosition || new THREE.Vector3();
+        if (typeof group.userData.snapCoordinate === 'number') group.userData.basePosition[group.userData.axis] = group.userData.snapCoordinate;
+        dragPlane.setFromNormalAndCoplanarPoint(axis === 'z' ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(0, 0, 1), hit.point);
+        const point = new THREE.Vector3();
+        if (!raycaster.ray.intersectPlane(dragPlane, point)) return;
+        dragState = { group, axis, startPointer: point.clone(), startOffset: group.position[axis] };
+        controls.enabled = false;
+        renderer.domElement.setPointerCapture(event.pointerId);
+        renderer.domElement.style.cursor = 'grabbing';
+      });
+      renderer.domElement.addEventListener('pointermove', event => {
+        if (!dragState) return;
+        getPointer(event);
+        const point = new THREE.Vector3();
+        if (!raycaster.ray.intersectPlane(dragPlane, point)) return;
+        const axis = dragState.axis;
+        const rawOffset = dragState.startOffset + point[axis] - dragState.startPointer[axis];
+        dragState.group.position[axis] = snapDimensionOffset(dragState.group, axis, rawOffset);
+      });
+      function finishDrag(event) {
+        if (!dragState) return;
+        const saved = JSON.parse(localStorage.getItem('wardrobe-dimension-offsets-v5') || '{}');
+        saved[dragState.group.userData.id] = dragState.group.position[dragState.axis];
+        localStorage.setItem('wardrobe-dimension-offsets-v5', JSON.stringify(saved));
+        // Одновременно сохраняем раскладку в проект: её можно будет зафиксировать в коде.
+        if (location.hostname === '127.0.0.1') {
+          fetch('/layout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offsets: saved }), keepalive: true }).catch(() => {});
+        }
+        dragState = null; controls.enabled = true; renderer.domElement.style.cursor = 'grab';
+        if (renderer.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
+      }
+      renderer.domElement.addEventListener('pointerup', finishDrag);
+      renderer.domElement.addEventListener('pointercancel', finishDrag);
+      renderer.domElement.style.cursor = 'grab';
+      // Локальная разработка обновляется после сохранения файла; опубликованная копия остаётся статичной.
+      if (location.hostname === '127.0.0.1') {
+        const changes = new EventSource('/events');
+        changes.addEventListener('reload', () => location.reload());
+      }
+      document.getElementById('info-toggle').addEventListener('click', () => { document.getElementById('info-panel').hidden = false; });
+      document.getElementById('info-close').addEventListener('click', () => { document.getElementById('info-panel').hidden = true; });
+      function resize() { const box = stage.getBoundingClientRect(); camera.aspect = box.width / box.height; camera.updateProjectionMatrix(); renderer.setSize(box.width, box.height, false); if (activeView === 'front') front(); else iso(); }
+      new ResizeObserver(resize).observe(stage);
+      iso(); resize();
+      document.getElementById('loading').hidden = true;
+      (function draw() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(draw); })();
+    } catch (error) {
+      console.error(error);
+      fallback.style.display = 'grid';
+    }
+  </script>
+</body>
+</html>
