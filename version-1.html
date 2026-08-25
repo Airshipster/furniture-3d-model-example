@@ -79,7 +79,10 @@
     const fallback = document.getElementById('fallback');
     const modelVersion = '1';
     let language = new URLSearchParams(location.search).has('az') ? 'az' : 'ru';
-function versionUrl(version, locale = language) { return `${new URL('.', location.href).pathname}?v=${version}&${locale}`; }
+function versionUrl(version, locale = language) {
+  const path = location.pathname.endsWith('/') ? location.pathname : location.pathname.replace(/[^/]*$/, '');
+  return `${path}?v=${version}&${locale}`;
+}
     document.querySelectorAll('[data-version]').forEach(button => button.addEventListener('click', () => { location.href = versionUrl(button.dataset.version); }));
     try {
       // Корпусный вариант: ЛДСП 20 мм, фасады той же толщины.
