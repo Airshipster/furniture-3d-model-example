@@ -465,7 +465,7 @@ function versionUrl(version, locale = language) {
 
         // Единый корпус антресоли. Нижняя плита антресоли и крышки нижних тумб образуют двойной стык.
         const mezzanineLeft = -W / 2 + T, mezzanineRight = W / 2 - T;
-        // Антресоль также собрана из трёх корпусов: её двойные стенки стоят
+        // Антресоль имеет три секции с общими дном и крышкой: её двойные стенки стоят
         // строго над двойными стенками нижних модулей.
         const mezzanineSeparatorLeft = lowerLeft.x2, mezzanineSeparatorRight = lowerRight.x1;
         const mezzanineMidY = mezzanineBottomTop + mezzanineClearHeight / 2;
@@ -499,17 +499,17 @@ function versionUrl(version, locale = language) {
           const line = new THREE.Line(geometry, new THREE.LineDashedMaterial({ color: 0x91a0a8, dashSize: 5, gapSize: 3, transparent: true, opacity: 0.82 }));
           line.computeLineDistances(); cabinet.add(line);
         }
-        lowerCases.forEach(section => rearPanelMark(section.x1 + T / 2, section.x2 - T / 2, innerBottom, lowerTopBottom));
+        lowerCases.forEach(section => rearPanelMark(section.x1, section.x2, innerBottom, lowerTopBottom));
         // The mezzanine has one continuous rear hardboard sheet, despite its three front cases.
-        rearPanelMark(-W / 2 + T / 2, W / 2 - T / 2, mezzanineBottomTop, H - T / 2);
+        rearPanelMark(-W / 2 + T / 2, W / 2 - T / 2, lowerTopBottom, H - T);
         // One visible rear seam runs through the centre of the double horizontal joint.
         rearSeam(-W / 2 + T / 2, lowerTopBottom + T, W / 2 - T / 2, lowerTopBottom + T);
 
-        surfaceMeasureLabel('surface-top', 'top', `${Math.round(W * 10)} × ${Math.round(D * 10)} мм`, 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
-        surfaceMeasureLabel('surface-left-lower', 'left', `${Math.round(D * 10)} × ${Math.round(lowerTopBottom * 10)} мм`, -W / 2 - 0.32, lowerTopBottom / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
-        surfaceMeasureLabel('surface-right-lower', 'right', `${Math.round(D * 10)} × ${Math.round(lowerTopBottom * 10)} мм`, W / 2 + 0.32, lowerTopBottom / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
-        surfaceMeasureLabel('surface-left-mezzanine', 'left', `${Math.round(D * 10)} × ${Math.round(mezzanineClearHeight * 10)} мм`, -W / 2 - 0.32, mezzanineBottomTop + mezzanineClearHeight / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
-        surfaceMeasureLabel('surface-right-mezzanine', 'right', `${Math.round(D * 10)} × ${Math.round(mezzanineClearHeight * 10)} мм`, W / 2 + 0.32, mezzanineBottomTop + mezzanineClearHeight / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
+        surfaceMeasureLabel('surface-top', 'top', `${Math.round(W * 10)} × ${(internalBoardDepth * 10).toFixed(1)} мм`, 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
+        surfaceMeasureLabel('surface-left-lower', 'left', `${(internalBoardDepth * 10).toFixed(1)} × ${Math.round(lowerTopBottom * 10)} мм`, -W / 2 - 0.32, lowerTopBottom / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
+        surfaceMeasureLabel('surface-right-lower', 'right', `${(internalBoardDepth * 10).toFixed(1)} × ${Math.round(lowerTopBottom * 10)} мм`, W / 2 + 0.32, lowerTopBottom / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
+        surfaceMeasureLabel('surface-left-mezzanine', 'left', `${(internalBoardDepth * 10).toFixed(1)} × ${Math.round(mezzanineClearHeight * 10)} мм`, -W / 2 - 0.32, mezzanineBottomTop + mezzanineClearHeight / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
+        surfaceMeasureLabel('surface-right-mezzanine', 'right', `${(internalBoardDepth * 10).toFixed(1)} × ${Math.round(mezzanineClearHeight * 10)} мм`, W / 2 + 0.32, mezzanineBottomTop + mezzanineClearHeight / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
 
         // Высоты снизу вверх: H/G/F по 25 см; C/D/E делят оставшуюся высоту поровну.
         const hgfClearHeight = 25;
@@ -540,7 +540,7 @@ function versionUrl(version, locale = language) {
         const rod = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, centerClearWidth - 4, 24), metal);
         rod.rotation.z = Math.PI / 2; rod.position.set(0, rodY, 0); cabinet.add(rod);
 
-        // L сохраняется из прошлого варианта: отдельный нижний проём ровно 50 см.
+        // L сохраняет отдельную откидную дверцу.
         const leftCenter = (lowerLeft.innerLeft + lowerLeft.innerRight) / 2;
         // P и M выросли на 3 см за счёт L.
         const lTop = innerBottom + 47;
@@ -637,7 +637,7 @@ function versionUrl(version, locale = language) {
 
       if (modelVersion === '2') {
         document.getElementById('title').textContent = 'Шкаф для ниши';
-        document.getElementById('subtitle').textContent = 'Три самостоятельных нижних и три верхних корпуса с общей крышкой.';
+        document.getElementById('subtitle').textContent = 'Три отдельных нижних корпуса и одна общая трёхсекционная антресоль.';
         buildVersion2();
       } else {
       // Внешние боковины доходят до пола и сами образуют боковые стороны цоколя.
@@ -1081,7 +1081,9 @@ function versionUrl(version, locale = language) {
         document.getElementById('info-heading').textContent = t.info;
         document.getElementById('info-close').setAttribute('aria-label', t.closeInfo);
         document.getElementById('touch-hint').textContent = t.touchHint;
-        document.getElementById('subtitle').textContent = t.subtitle;
+        document.getElementById('subtitle').textContent = language === 'az'
+          ? 'Üç ayrı alt korpus və üç bölməli vahid üst modul.'
+          : 'Три отдельных нижних корпуса и одна общая трёхсекционная антресоль.';
         document.getElementById('front').textContent = t.front;
         document.getElementById('iso').textContent = t.iso;
         document.getElementById('doors').textContent = doorsOpen ? t.closeDoors : t.openDoors;

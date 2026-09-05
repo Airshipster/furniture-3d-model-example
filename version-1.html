@@ -441,25 +441,22 @@ function versionUrl(version, locale = language) {
       // Крышка лежит сверху на стойках: боковины заканчиваются ровно под ней.
       board(-W / 2 + T / 2, (H - T) / 2, internalBoardZ, T, H - T, internalBoardDepth);
       board(W / 2 - T / 2, (H - T) / 2, internalBoardZ, T, H - T, internalBoardDepth);
-      // Днище зажато между боковинами, а не проходит сквозь них.
-      board(0, plinthH + T / 2, internalBoardZ, W - T * 2, T, internalBoardDepth);
+      // Днища секций добавляются после расчёта непрерывных стоек.
       board(0, H - T / 2, internalBoardZ, W, T, internalBoardDepth);
-      // Оргалит заходит на корпус на 8 мм по всему периметру: он перекрывает
+      // Оргалит заходит на корпус на 10 мм по всему периметру: он перекрывает
       // половину толщины боковин, крышки и верхней панели цоколя.
       const rearOverlap = T / 2;
-      const rearPanelWidth = W - T;
       const rearPanelHeight = H - plinthH - T;
       const rearPanelBottom = innerBottom - rearOverlap;
       const rearPanelTop = H - T + rearOverlap;
-      board(0, (rearPanelBottom + rearPanelTop) / 2, D / 2 - rearT / 2, rearPanelWidth, rearPanelHeight, rearT, rear);
       // Цоколь не образует коробку: его лицевая часть будет разделена по трём секциям.
       // Её фасад утоплен на 2 см, сзади отдельной стенки нет.
       const plinthFrontZ = -D / 2 + 2 + T / 2;
       // Внешние стороны — только компактные наклейки в формате дверей, без оранжевых полос.
       // Верхняя карточка лежит на другой стороне, как физически перевёрнутая визитка.
-      surfaceMeasureLabel('surface-top', 'top', `${Math.round(W * 10)} × ${Math.round(D * 10)} мм`, 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
-      surfaceMeasureLabel('surface-left', 'left', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, -W / 2 - 0.32, H / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
-      surfaceMeasureLabel('surface-right', 'right', `${Math.round(D * 10)} × ${Math.round(H * 10)} мм`, W / 2 + 0.32, H / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
+      surfaceMeasureLabel('surface-top', 'top', `${Math.round(W * 10)} × ${(internalBoardDepth * 10).toFixed(1)} мм`, 0, H + 0.32, 0, { x: Math.PI / 2 }, 9.6, 'z', THREE.BackSide, true);
+      surfaceMeasureLabel('surface-left', 'left', `${(internalBoardDepth * 10).toFixed(1)} × ${Math.round((H - T) * 10)} мм`, -W / 2 - 0.32, H / 2, 0, { y: -Math.PI / 2 }, 9.6, 'z');
+      surfaceMeasureLabel('surface-right', 'right', `${(internalBoardDepth * 10).toFixed(1)} × ${Math.round((H - T) * 10)} мм`, W / 2 + 0.32, H / 2, 0, { y: Math.PI / 2 }, 9.6, 'z');
 
       // Центральный чистый проём фиксирован на 100 см; остаток делится поровну между боковыми секциями.
       // Камера смотрит с фасада, поэтому экранные стороны обратны координате X.
@@ -485,6 +482,7 @@ function versionUrl(version, locale = language) {
       plinthSections.forEach(([x1, x2], index) => {
         const width = x2 - x1;
         const x = (x1 + x2) / 2;
+        board(x, plinthH + T / 2, internalBoardZ, width, T, internalBoardDepth);
         board(x, plinthH / 2, plinthFrontZ, width, plinthH, T);
         // С точки зрения фронтального вида нумерация идёт слева направо.
         plinthMeasureLabel(width, plinthH, plinthFrontZ - T / 2, x, String(plinthSections.length - index));
@@ -492,6 +490,8 @@ function versionUrl(version, locale = language) {
       // Три листа оргалита показаны тонкими рамками с крестом внутри.
       function rearPanelMark(x1, x2) {
         const y1 = rearPanelBottom, y2 = rearPanelTop, z = D / 2 + 0.24;
+        // Один физический лист и его рамка используют одни и те же границы.
+        board((x1 + x2) / 2, (y1 + y2) / 2, D / 2 - rearT / 2, x2 - x1, rearPanelHeight, rearT, rear);
         const geometry = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3(x1, y1, z), new THREE.Vector3(x2, y2, z),
           new THREE.Vector3(x1, y2, z), new THREE.Vector3(x2, y1, z),
@@ -574,9 +574,9 @@ function versionUrl(version, locale = language) {
       [...shoeOpenings, ...shelfOpenings].forEach(([bottom, top], index) =>
         sectionLabel(String.fromCharCode(72 - index), entryCenter, (bottom + top) / 2, rearLabelZ, entryWidth, top - bottom)
       );
-      sectionLabel('I', hangingCenter, (innerBottom + lowerCenterShelfY - T / 2) / 2, rearLabelZ, hangingWidth, lowerCenterShelfY - innerBottom);
+      sectionLabel('I', hangingCenter, (innerBottom + lowerCenterShelfY - T / 2) / 2, rearLabelZ, hangingWidth, lowerCenterShelfY - T / 2 - innerBottom);
       sectionLabel('J', hangingCenter, (lowerCenterShelfY + T / 2 + upperCenterShelfY - T / 2) / 2, rearLabelZ, hangingWidth, upperCenterShelfY - lowerCenterShelfY - T);
-      sectionLabel('K', hangingCenter, (upperCenterShelfY + T / 2 + H - T) / 2, rearLabelZ, hangingWidth, H - upperCenterShelfY - T);
+      sectionLabel('K', hangingCenter, (upperCenterShelfY + T / 2 + H - T) / 2, rearLabelZ, hangingWidth, H - T - upperCenterShelfY - T / 2);
 
       // Над нишей C пространство делится пополам после открытия одной дверцы.
       const upperCatBottom = catShelfY + T / 2;
@@ -586,7 +586,7 @@ function versionUrl(version, locale = language) {
       // Разделитель имеет ту же глубину, что и опорная полка.
       rearSeam(new THREE.Vector3(reserveCenter, upperCatBottom, D / 2 + 0.22), new THREE.Vector3(reserveCenter, H - T, D / 2 + 0.22));
       // L выводится ближе к фасаду, чтобы его не перекрывала откидная створка.
-      sectionLabel('L', reserveCenter, (innerBottom + catShelfY - T / 2) / 2, rearLabelZ - 1.5, reserveWidth, catShelfY - innerBottom);
+      sectionLabel('L', reserveCenter, (innerBottom + catShelfY - T / 2) / 2, rearLabelZ - 1.5, reserveWidth, catShelfY - T / 2 - innerBottom);
       // M/P имеют чистую высоту 143 см. Оставшиеся N/Q и O/R делят свободный остаток поровну.
       const lowerCatClearHeight = 143;
       const upperCatAvailable = H - T - upperCatBottom;
@@ -620,7 +620,7 @@ function versionUrl(version, locale = language) {
       // В C полупрозрачная дверца закрывает только пространство над кошачьей нишей.
       const doorZ = -D / 2 - T / 2;
       // Tall facades cover the upper 20 mm panel as well as the inner opening.
-      const facadeTop = H + 0.7;
+      const facadeTop = H;
       const internalHeight = facadeTop - plinthH;
       // Нижние фасады перекрывают лицевой торец днища и начинаются от цоколя.
       const shoeDoorBottom = plinthH;
